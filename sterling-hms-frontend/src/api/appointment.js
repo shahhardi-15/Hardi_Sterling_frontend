@@ -1,4 +1,4 @@
-import api from './auth' // Use the existing auth API instance
+import { api } from './auth' // Use the existing auth API instance
 
 export const appointmentAPI = {
   // Get patient profile
@@ -19,6 +19,20 @@ export const appointmentAPI = {
   // Get all doctors
   getDoctors() {
     return api.get('/doctors')
+  },
+
+  // Get all specializations
+  getSpecializations() {
+    return api.get('/specializations')
+  },
+
+  // Get doctors by specialization
+  getDoctorsBySpecialization(specialization) {
+    return api.get('/doctors/by-specialization', {
+      params: {
+        specialization
+      }
+    })
   },
 
   // Get available slots for a doctor

@@ -7,6 +7,9 @@ export const useAppointmentStore = defineStore('appointment', () => {
   const profile = ref(null)
   const appointments = ref([])
   const doctors = ref([])
+  const specializations = ref([])
+  const doctorsBySpecialization = ref([])
+  const selectedDoctor = ref(null)
   const availableSlots = ref([])
   const loading = ref(false)
   const error = ref(null)
@@ -59,6 +62,48 @@ export const useAppointmentStore = defineStore('appointment', () => {
     } finally {
       loading.value = false
     }
+  }
+
+  // Get all specializations
+  const getSpecializations = async () => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await appointmentAPI.getSpecializations()
+      specializations.value = response.data.specializations || []
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Failed to fetch specializations'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // Get doctors by specialization
+  const getDoctorsBySpecialization = async (specializationName) => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await appointmentAPI.getDoctorsBySpecialization(specializationName)
+      doctorsBySpecialization.value = response.data.doctors || []
+      return response.data
+    } catch (err) {
+      error.value = err.response?.data?.message || 'Failed to fetch doctors'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // Set selected doctor
+  const setSelectedDoctor = (doctor) => {
+    selectedDoctor.value = doctor
+  }
+
+  // Clear selected doctor
+  const clearSelectedDoctor = () => {
+    selectedDoctor.value = null
   }
 
   // Get available slots for a doctor
@@ -120,6 +165,9 @@ export const useAppointmentStore = defineStore('appointment', () => {
     profile.value = null
     appointments.value = []
     doctors.value = []
+    specializations.value = []
+    doctorsBySpecialization.value = []
+    selectedDoctor.value = null
     availableSlots.value = []
     loading.value = false
     error.value = null
@@ -131,6 +179,9 @@ export const useAppointmentStore = defineStore('appointment', () => {
     profile,
     appointments,
     doctors,
+    specializations,
+    doctorsBySpecialization,
+    selectedDoctor,
     availableSlots,
     loading,
     error,
@@ -140,6 +191,10 @@ export const useAppointmentStore = defineStore('appointment', () => {
     getProfile,
     getHistory,
     getDoctors,
+    getSpecializations,
+    getDoctorsBySpecialization,
+    setSelectedDoctor,
+    clearSelectedDoctor,
     getAvailableSlots,
     bookAppointment,
     cancelAppointment,

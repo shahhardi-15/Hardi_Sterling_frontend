@@ -38,7 +38,7 @@
         <tbody>
           <tr v-for="appointment in filteredAppointments" :key="appointment.id" :class="`status-${appointment.status}`">
             <td>{{ formatDate(appointment.appointmentDate) }}</td>
-            <td>{{ appointment.timeSlot }}</td>
+            <td>{{ formatTimeSlot(appointment.timeSlot) }}</td>
             <td>{{ appointment.doctor.name }}</td>
             <td>{{ appointment.doctor.specialization }}</td>
             <td>{{ appointment.reason }}</td>
@@ -151,6 +151,14 @@ const formatStatus = (status) => {
     'no-show': 'No Show'
   }
   return statusMap[status] || status
+}
+
+const formatTimeSlot = (time24h) => {
+  const [hours, minutes] = time24h.split(':')
+  const hour = parseInt(hours)
+  const ampm = hour >= 12 ? 'PM' : 'AM'
+  const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour)
+  return `${displayHour}:${minutes} ${ampm}`
 }
 
 const cancelAppointment = async (appointmentId) => {

@@ -1,0 +1,4 @@
+[   15214ms] [ERROR] Access to XMLHttpRequest at 'http://localhost:5000/api/admin/login' from origin 'http://localhost:5174' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:5174/login:0
+[   15217ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:5000/api/admin/login:0
+[   37458ms] [ERROR] Access to fetch at 'http://localhost:5000/health' from origin 'http://localhost:5174' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:5174/login:0
+[   37460ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:5000/health:0

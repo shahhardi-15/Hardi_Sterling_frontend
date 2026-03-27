@@ -1,0 +1,4 @@
+[   26472ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:5000/api/auth/signin:0
+[   89167ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5000/api/appointments/history?page=1&limit=10:0
+[   89197ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5000/api/appointments/history?page=1&limit=100:0
+[   98695ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5000/api/doctors/by-specialization?specialization=General+Practitioner:0

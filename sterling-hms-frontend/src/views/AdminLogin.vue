@@ -1,10 +1,10 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAdminStore } from '@/stores/admin'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
-const adminStore = useAdminStore()
+const authStore = useAuthStore()
 
 const email = ref('')
 const password = ref('')
@@ -25,11 +25,19 @@ const handleLogin = async () => {
   }
 
   try {
-    await adminStore.loginAdmin(email.value, password.value)
+    const result = await authStore.signin(email.value, password.value)
+    console.log('Login successful:', result)
+    console.log('Auth store state:', {
+      token: authStore.token,
+      userType: authStore.userType,
+      isAdmin: authStore.isAdmin,
+      isAuthenticated: authStore.isAuthenticated
+    })
     // Redirect to admin dashboard after successful login
-    router.push('/admin/dashboard')
+    await router.push('/admin/dashboard')
   } catch (err) {
-    localError.value = adminStore.error || 'Incorrect password'
+    console.error('Login error:', err)
+    localError.value = authStore.error || 'Incorrect password'
   }
 }
 
@@ -76,7 +84,7 @@ const handleKeyPress = (e) => {
               type="email"
               autocomplete="email"
               required
-              :disabled="adminStore.loading"
+              :disabled="authStore.loading"
               @keypress="handleKeyPress"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition disabled:bg-gray-100"
               placeholder="adminsterling@gmail.com"
@@ -95,7 +103,7 @@ const handleKeyPress = (e) => {
               type="password"
               autocomplete="current-password"
               required
-              :disabled="adminStore.loading"
+              :disabled="authStore.loading"
               @keypress="handleKeyPress"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition disabled:bg-gray-100"
               placeholder="••••••••"
@@ -105,10 +113,10 @@ const handleKeyPress = (e) => {
           <!-- Login Button -->
           <button
             type="submit"
-            :disabled="adminStore.loading"
+            :disabled="authStore.loading"
             class="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 disabled:transform-none"
           >
-            <span v-if="!adminStore.loading">Sign In as Admin</span>
+            <span v-if="!authStore.loading">Sign In as Admin</span>
             <span v-else class="flex items-center justify-center">
               <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
