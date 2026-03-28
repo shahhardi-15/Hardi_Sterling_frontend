@@ -100,7 +100,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useAppointmentStore } from '@/stores/appointment'
 
 const appointmentStore = useAppointmentStore()
@@ -127,15 +127,28 @@ const totalPages = computed(() => {
   return Math.ceil(appointmentStore.totalAppointments / itemsPerPage)
 })
 
-onMounted(async () => {
+// Function to load appointment history
+const loadAppointmentHistory = async () => {
   try {
     loading.value = true
+    error.value = ''
     await appointmentStore.getHistory(currentPage.value, itemsPerPage)
   } catch (err) {
     error.value = 'Failed to load appointments'
+    console.error('Error loading appointments:', err)
   } finally {
     loading.value = false
   }
+}
+
+// Load appointments on mount
+onMounted(async () => {
+  await loadAppointmentHistory()
+})
+
+// Watch for page changes and reload data
+watch(currentPage, async () => {
+  await loadAppointmentHistory()
 })
 
 const formatDate = (dateString) => {

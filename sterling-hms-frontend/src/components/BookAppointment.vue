@@ -138,7 +138,7 @@
                 :class="['slot-btn', { 'selected': form.timeSlot === slot.time }]"
                 @click.prevent="form.timeSlot = slot.time"
               >
-                {{ formatTimeSlot(slot.time) }}
+                {{ slot.time }}
               </button>
             </div>
           </div>
@@ -305,23 +305,16 @@ const onDateChange = async () => {
 
 const generateRandomTimeSlots = () => {
   const timeSlots = [
-    '09:00', '09:30', '10:00', '10:30',
-    '11:00', '14:00', '14:30', '15:00',
-    '15:30', '16:00'
+    '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM',
+    '11:00 AM', '11:30 AM', '12:00 PM', '02:00 PM',
+    '02:30 PM', '03:00 PM', '03:30 PM', '04:00 PM',
+    '04:30 PM', '05:00 PM', '05:30 PM'
   ]
   
   // Randomly select 3-4 time slots
   const numSlots = Math.floor(Math.random() * 2) + 3 // 3 or 4
   const shuffled = [...timeSlots].sort(() => 0.5 - Math.random())
   availableTimeSlots.value = shuffled.slice(0, numSlots)
-}
-
-const formatTimeSlot = (time24h) => {
-  const [hours, minutes] = time24h.split(':')
-  const hour = parseInt(hours)
-  const ampm = hour >= 12 ? 'PM' : 'AM'
-  const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour)
-  return `${displayHour}:${minutes} ${ampm}`
 }
 
 const submitBooking = async () => {

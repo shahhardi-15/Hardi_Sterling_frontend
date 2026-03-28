@@ -13,20 +13,33 @@ const stats = ref(null)
 const showMenu = ref(false)
 
 onMounted(async () => {
+  console.log('[ADMIN_DASHBOARD] Mounting...')
+  
   // Initialize auth data from storage
+  console.log('[ADMIN_DASHBOARD] Initializing auth')
   authStore.initializeAuth()
+  
+  console.log('[ADMIN_DASHBOARD] Auth state:')
+  console.log('  isAdmin:', authStore.isAdmin)
+  console.log('  isAuthenticated:', authStore.isAuthenticated)
+  console.log('  userType:', authStore.userType)
+  console.log('  token:', !!authStore.token)
 
   // Check if admin is authenticated
   if (!authStore.isAdmin) {
+    console.log('[ADMIN_DASHBOARD] Not admin, redirecting to login')
     router.push('/login')
     return
   }
+
+  console.log('[ADMIN_DASHBOARD] Admin authenticated, loading stats')
 
   // Fetch dashboard statistics
   loading.value = true
   try {
     const response = await adminAPI.getDashboardStats(authStore.token)
     stats.value = response.data.stats
+    console.log('[ADMIN_DASHBOARD] Stats loaded:', stats.value)
   } catch (err) {
     error.value = 'Failed to load dashboard statistics'
     console.error('Error loading stats:', err)

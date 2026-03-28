@@ -93,20 +93,50 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const initializeAuth = () => {
+    console.log('[AUTH] Initializing auth...')
+    
+    // Restore token
+    const storedToken = localStorage.getItem('authToken')
+    if (storedToken) {
+      token.value = storedToken
+      console.log('[AUTH] Token restored from localStorage')
+    }
+    
+    // Restore userType
     const storedUserType = localStorage.getItem('userType')
-    userType.value = storedUserType
+    if (storedUserType) {
+      userType.value = storedUserType
+      console.log('[AUTH] UserType restored:', storedUserType)
+    }
 
+    // Restore user data based on type
     if (storedUserType === 'admin') {
       const storedAdmin = localStorage.getItem('admin')
       if (storedAdmin) {
-        admin.value = JSON.parse(storedAdmin)
+        try {
+          admin.value = JSON.parse(storedAdmin)
+          console.log('[AUTH] Admin data restored')
+        } catch (e) {
+          console.error('[AUTH] Failed to parse admin data:', e)
+        }
       }
     } else if (storedUserType === 'patient') {
       const storedUser = localStorage.getItem('user')
       if (storedUser) {
-        user.value = JSON.parse(storedUser)
+        try {
+          user.value = JSON.parse(storedUser)
+          console.log('[AUTH] User data restored')
+        } catch (e) {
+          console.error('[AUTH] Failed to parse user data:', e)
+        }
       }
     }
+    
+    console.log('[AUTH] Auth initialization complete. isAdmin:', userType.value === 'admin', 'isAuthenticated:', !!token.value)
+  }
+
+  const restoreSession = () => {
+    initializeAuth()
   }
 
   return {
@@ -123,5 +153,6 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     getCurrentUser,
     initializeAuth,
+    restoreSession,
   }
 })
