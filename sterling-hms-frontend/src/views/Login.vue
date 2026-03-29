@@ -287,7 +287,7 @@ console.log('[LOGIN.VUE] Script setup complete')
             </div>
             <div class="border-t border-white/10 pt-2 text-sky-200">
               <p class="font-semibold">🩺 Doctor</p>
-              <p class="text-sky-300/80">Email: dr.smith@sterling.com | Password: doctor@123</p>
+              <p class="text-sky-300/80">Email: testpat@example.com | Password: TestPass@123</p>
             </div>
             <div class="border-t border-white/10 pt-2 text-green-200">
               <p class="font-semibold">👨‍⚕️ Receptionist</p>
