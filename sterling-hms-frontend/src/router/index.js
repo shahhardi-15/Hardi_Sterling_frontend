@@ -7,6 +7,8 @@ import SignUp from '../views/SignUp.vue'
 import Dashboard from '../views/Dashboard.vue'
 import ForgotPassword from '../views/ForgotPassword.vue'
 import AdminDashboard from '../views/AdminDashboard.vue'
+import ManagePatients from '../views/ManagePatients.vue'
+import ManageDoctors from '../views/admin/ManageDoctors.vue'
 import ReceptionistDashboard from '../views/ReceptionistDashboard.vue'
 import DoctorDashboard from '../views/DoctorDashboard.vue'
 
@@ -43,6 +45,18 @@ const routes = [
     path: '/admin/dashboard',
     name: 'AdminDashboard',
     component: AdminDashboard,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
+    path: '/admin/patients',
+    name: 'ManagePatients',
+    component: ManagePatients,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
+    path: '/admin/doctors',
+    name: 'ManageDoctors',
+    component: ManageDoctors,
     meta: { requiresAuth: true, requiresAdmin: true },
   },
   {

@@ -97,63 +97,33 @@ const handleLogin = async (e) => {
       // Continue to try other login methods
     }
 
-    // Patient login
-    console.log('[HANDLER] Trying patient login')
+    // Patient/Admin login
+    console.log('[HANDLER] Trying patient/admin login')
     try {
       const response = await authStore.signin(email.value, password.value)
-      console.log('[HANDLER] Patient login success:', response)
+      console.log('[HANDLER] Login success:', response)
       console.log('[HANDLER] authStore.token:', authStore.token)
+      console.log('[HANDLER] authStore.userType:', authStore.userType)
       console.log('[HANDLER] authStore.isAuthenticated:', authStore.isAuthenticated)
       authStore.loading = false
-      console.log('[HANDLER] Redirecting to /dashboard')
-      await router.push('/dashboard')
-      console.log('[HANDLER] Patient redirect completed')
-      return
-    } catch (err) {
-      console.error('[HANDLER] Patient login failed:', err.message)
-    }
-
-    // Admin login
-    console.log('[HANDLER] Trying admin login')
-    try {
-      console.log('[HANDLER] Calling adminAPI.login()')
-      const adminResponse = await adminAPI.login(email.value, password.value)
-      console.log('[HANDLER] Admin API response received:', adminResponse)
-      console.log('[HANDLER] Response data:', adminResponse.data)
       
-      console.log('[HANDLER] Setting authStore values')
-      authStore.token = adminResponse.data.token
-      authStore.admin = adminResponse.data.admin
-      authStore.userType = 'admin'
-      
-      console.log('[HANDLER] Saving to localStorage')
-      localStorage.setItem('authToken', adminResponse.data.token)
-      localStorage.setItem('admin', JSON.stringify(adminResponse.data.admin))
-      localStorage.setItem('userType', 'admin')
-      
-      console.log('[HANDLER] AuthStore state after setting:')
-      console.log('  token:', !!authStore.token)
-      console.log('  isAdmin:', authStore.isAdmin)
-      console.log('  isAuthenticated:', authStore.isAuthenticated)
-      console.log('  userType:', authStore.userType)
-      
-      authStore.loading = false
-      
-      console.log('[HANDLER] About to redirect to /admin/dashboard')
-      try {
+      // Check user type and redirect accordingly
+      if (authStore.userType === 'admin') {
+        console.log('[HANDLER] Redirecting to /admin/dashboard')
         await router.push('/admin/dashboard')
-        console.log('[HANDLER] Admin redirect completed successfully')
-      } catch (pushErr) {
-        console.error('[HANDLER] Router.push error:', pushErr)
-        // Fallback: try location redirect
-        console.log('[HANDLER] Trying fallback location redirect')
-        window.location.href = '/admin/dashboard'
+        console.log('[HANDLER] Admin redirect completed')
+      } else {
+        console.log('[HANDLER] Redirecting to /dashboard')
+        await router.push('/dashboard')
+        console.log('[HANDLER] Patient redirect completed')
       }
       return
     } catch (err) {
-      console.error('[HANDLER] Admin login failed:', err.message)
-      console.error('[HANDLER] Admin error details:', err)
+      console.error('[HANDLER] Patient/Admin login failed:', err.message)
     }
+
+    // Admin login (removed - handled by authStore.signin())
+    // The admin login is now handled in authStore.signin() method
 
     localError.value = 'Invalid email or password'
   } catch (err) {

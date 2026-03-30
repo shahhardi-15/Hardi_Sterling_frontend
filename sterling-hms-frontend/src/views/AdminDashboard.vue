@@ -172,7 +172,7 @@ const navigateTo = (route) => {
         <section class="dashboard-section">
           <h2 class="section-title">Management</h2>
           <div class="management-grid">
-            <button @click="navigateTo('/admin/users')" class="management-btn">
+            <button @click="navigateTo('/admin/patients')" class="management-btn">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-2a6 6 0 0112 0v2zm0 0h6v-2a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
               </svg>
