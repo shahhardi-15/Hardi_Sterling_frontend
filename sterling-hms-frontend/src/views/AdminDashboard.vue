@@ -9,40 +9,43 @@ const authStore = useAuthStore()
 
 const loading = ref(false)
 const error = ref('')
-const stats = ref(null)
-const showMenu = ref(false)
+const stats = ref({
+  totalPatients: 0,
+  totalDoctors: 0,
+  totalReceptionists: 0,
+  totalAppointments: 0,
+  upcomingAppointments: 0,
+  completedAppointments: 0
+})
 
 onMounted(async () => {
-  console.log('[ADMIN_DASHBOARD] Mounting...')
-  
   // Initialize auth data from storage
-  console.log('[ADMIN_DASHBOARD] Initializing auth')
   authStore.initializeAuth()
-  
-  console.log('[ADMIN_DASHBOARD] Auth state:')
-  console.log('  isAdmin:', authStore.isAdmin)
-  console.log('  isAuthenticated:', authStore.isAuthenticated)
-  console.log('  userType:', authStore.userType)
-  console.log('  token:', !!authStore.token)
 
   // Check if admin is authenticated
   if (!authStore.isAdmin) {
-    console.log('[ADMIN_DASHBOARD] Not admin, redirecting to login')
     router.push('/login')
     return
   }
 
-  console.log('[ADMIN_DASHBOARD] Admin authenticated, loading stats')
+  // Verify token exists
+  if (!authStore.token) {
+    error.value = 'Session expired. Please login again.'
+    setTimeout(() => router.push('/admin/login'), 2000)
+    return
+  }
 
   // Fetch dashboard statistics
   loading.value = true
   try {
     const response = await adminAPI.getDashboardStats(authStore.token)
-    stats.value = response.data.stats
-    console.log('[ADMIN_DASHBOARD] Stats loaded:', stats.value)
+    stats.value = response.data.stats || stats.value
   } catch (err) {
     error.value = 'Failed to load dashboard statistics'
     console.error('Error loading stats:', err)
+    if (err.response?.status === 401) {
+      setTimeout(() => router.push('/admin/login'), 2000)
+    }
   } finally {
     loading.value = false
   }
@@ -60,250 +63,552 @@ const handleLogout = async () => {
 }
 
 const navigateTo = (route) => {
-  showMenu.value = false
   router.push(route)
 }
 </script>
 
 <template>
-  <div v-if="authStore.isAdmin" class="min-h-screen bg-gray-100">
-    <!-- Navigation Bar -->
-    <nav class="bg-red-600 text-white shadow-lg">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <!-- Logo -->
-          <div class="flex items-center">
-            <div class="flex items-center space-x-2">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              <span class="text-xl font-bold">Sterling HMS - Admin</span>
-            </div>
+  <div class="dashboard">
+    <!-- Header -->
+    <header class="dashboard-header">
+      <div class="header-content">
+        <div class="header-top">
+          <div>
+            <h1>Admin Dashboard</h1>
+            <p class="header-subtitle">Welcome, Administrator</p>
           </div>
-
-          <!-- Menu Button (Mobile) -->
-          <div class="flex items-center md:hidden">
-            <button
-              @click="showMenu = !showMenu"
-              class="inline-flex items-center justify-center p-2 rounded-md hover:bg-red-700 focus:outline-none"
-            >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-
-          <!-- Admin Menu (Desktop) -->
-          <div class="hidden md:flex items-center space-x-4">
-            <div class="flex items-center space-x-2">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-              </svg>
-              <span>{{ authStore.admin?.name || 'Admin' }}</span>
-            </div>
-            <button
-              @click="handleLogout"
-              class="bg-red-700 hover:bg-red-800 text-white px-3 py-2 rounded-md text-sm font-medium transition"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-
-        <!-- Mobile Menu -->
-        <div v-if="showMenu" class="md:hidden pb-4">
-          <div class="flex flex-col space-y-2">
-            <div class="px-2 py-1 text-sm">
-              <p class="text-red-100">{{ authStore.admin?.email }}</p>
-              <p class="font-medium">{{ authStore.admin?.name }}</p>
-            </div>
-            <button
-              @click="handleLogout"
-              class="w-full bg-red-700 hover:bg-red-800 text-white px-3 py-2 rounded-md text-sm font-medium transition text-left"
-            >
-              Logout
-            </button>
-          </div>
+          <button @click="handleLogout" class="logout-btn">
+            Logout
+          </button>
         </div>
       </div>
-    </nav>
+    </header>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Welcome Section -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">
-          Welcome, {{ authStore.admin?.name || 'Admin' }}!
-        </h1>
-        <p class="text-gray-600 mt-2">Here's your dashboard overview</p>
+    <main class="dashboard-content">
+      <div v-if="loading" class="loading-container">
+        <p>Loading dashboard...</p>
       </div>
 
-      <!-- Error Message -->
-      <div v-if="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-        {{ error }}
-      </div>
-
-      <!-- Loading State -->
-      <div v-if="loading" class="flex justify-center items-center h-64">
-        <div class="text-center">
-          <svg class="animate-spin h-12 w-12 text-red-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          <p class="text-gray-600">Loading dashboard...</p>
+      <div v-else class="dashboard-grid">
+        <!-- Error Display -->
+        <div v-if="error" class="alert alert-danger full-width">
+          {{ error }}
         </div>
-      </div>
 
-      <!-- Stats Cards -->
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <!-- Total Patients Card -->
-        <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-gray-600 text-sm font-medium">Total Patients</p>
-              <p class="text-3xl font-bold text-gray-900 mt-2">
-                {{ stats?.totalPatients || 0 }}
-              </p>
+        <!-- Statistics Cards -->
+        <section class="stats-section full-width">
+          <div class="stats-grid">
+            <!-- Total Patients Card -->
+            <div class="stat-card">
+              <div class="stat-icon patients-icon">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
+                </svg>
+              </div>
+              <div class="stat-info">
+                <h3 class="stat-value">{{ stats.totalPatients }}</h3>
+                <p class="stat-label">Total Patients</p>
+              </div>
             </div>
-            <div class="bg-blue-100 rounded-full p-4">
-              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0zM4 20h16c1.1 0 2-.9 2-2v-2a6 6 0 00-6-6H4a6 6 0 000 12z" />
-              </svg>
+
+            <!-- Total Doctors Card -->
+            <div class="stat-card">
+              <div class="stat-icon doctors-icon">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
+                </svg>
+              </div>
+              <div class="stat-info">
+                <h3 class="stat-value">{{ stats.totalDoctors }}</h3>
+                <p class="stat-label">Total Doctors</p>
+              </div>
+            </div>
+
+            <!-- Total Receptionists Card -->
+            <div class="stat-card">
+              <div class="stat-icon receptionists-icon">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path>
+                </svg>
+              </div>
+              <div class="stat-info">
+                <h3 class="stat-value">{{ stats.totalReceptionists }}</h3>
+                <p class="stat-label">Receptionists</p>
+              </div>
+            </div>
+
+            <!-- Total Appointments Card -->
+            <div class="stat-card">
+              <div class="stat-icon appointments-icon">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v2H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v2H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                </svg>
+              </div>
+              <div class="stat-info">
+                <h3 class="stat-value">{{ stats.totalAppointments }}</h3>
+                <p class="stat-label">Total Appointments</p>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Total Appointments Card -->
-        <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-gray-600 text-sm font-medium">Total Appointments</p>
-              <p class="text-3xl font-bold text-gray-900 mt-2">
-                {{ stats?.totalAppointments || 0 }}
-              </p>
+        <!-- Appointment Statistics -->
+        <section class="dashboard-section">
+          <h2 class="section-title">Appointment Overview</h2>
+          <div class="appointment-stats">
+            <div class="stat-item">
+              <div class="stat-number upcoming">{{ stats.upcomingAppointments }}</div>
+              <div class="stat-text">Upcoming Appointments</div>
             </div>
-            <div class="bg-green-100 rounded-full p-4">
-              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+            <div class="stat-item">
+              <div class="stat-number completed">{{ stats.completedAppointments }}</div>
+              <div class="stat-text">Completed Appointments</div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Total Doctors Card -->
-        <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-gray-600 text-sm font-medium">Total Doctors</p>
-              <p class="text-3xl font-bold text-gray-900 mt-2">
-                {{ stats?.totalDoctors || 0 }}
-              </p>
-            </div>
-            <div class="bg-purple-100 rounded-full p-4">
-              <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+        <!-- Management Actions -->
+        <section class="dashboard-section">
+          <h2 class="section-title">Management</h2>
+          <div class="management-grid">
+            <button @click="navigateTo('/admin/users')" class="management-btn">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-2a6 6 0 0112 0v2zm0 0h6v-2a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
               </svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Total Staff Card -->
-        <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-gray-600 text-sm font-medium">Total Staff</p>
-              <p class="text-3xl font-bold text-gray-900 mt-2">
-                {{ stats?.totalStaff || 0 }}
-              </p>
-            </div>
-            <div class="bg-orange-100 rounded-full p-4">
-              <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 8.646 4 4 0 010-8.646M12 14H8m0 0H4m8 0h4m0 0h4m-2 4v4m0 0v2m0-2h-4m0 0h-4m4 0v-2" />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Recent Activity Section -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Links</h2>
-          <div class="space-y-3">
-            <button
-              @click="navigateTo('/admin/patients')"
-              class="w-full text-left px-4 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium transition"
-            >
-              Manage Patients
+              <span>Manage Patients</span>
             </button>
-            <button
-              @click="navigateTo('/admin/appointments')"
-              class="w-full text-left px-4 py-2 rounded-lg bg-green-50 hover:bg-green-100 text-green-700 font-medium transition"
-            >
-              View Appointments
+
+            <button @click="navigateTo('/admin/doctors')" class="management-btn">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+              </svg>
+              <span>Manage Doctors</span>
             </button>
-            <button
-              @click="navigateTo('/admin/doctors')"
-              class="w-full text-left px-4 py-2 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 font-medium transition"
-            >
-              Manage Doctors
+
+            <button @click="navigateTo('/admin/appointments')" class="management-btn">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              <span>View Appointments</span>
             </button>
-            <button
-              @click="navigateTo('/admin/reports')"
-              class="w-full text-left px-4 py-2 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 font-medium transition"
-            >
-              View Reports
+
+            <button @click="navigateTo('/admin/settings')" class="management-btn">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <span>Settings</span>
             </button>
           </div>
-        </div>
+        </section>
 
-        <!-- System Status -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">System Status</h2>
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="text-gray-700 font-medium">API Server</span>
-              <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
-                <span class="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
-                Online
-              </span>
+        <!-- System Health Section -->
+        <section class="dashboard-section full-width">
+          <h2 class="section-title">System Status</h2>
+          <div class="health-grid">
+            <div class="health-item">
+              <div class="health-status healthy"></div>
+              <div>
+                <p class="health-label">Database</p>
+                <p class="health-value">Connected</p>
+              </div>
             </div>
-            <div class="flex items-center justify-between">
-              <span class="text-gray-700 font-medium">Database</span>
-              <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
-                <span class="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
-                Connected
-              </span>
+            <div class="health-item">
+              <div class="health-status healthy"></div>
+              <div>
+                <p class="health-label">API Server</p>
+                <p class="health-value">Running</p>
+              </div>
             </div>
-            <div class="flex items-center justify-between">
-              <span class="text-gray-700 font-medium">Email Service</span>
-              <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
-                <span class="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
-                Active
-              </span>
-            </div>
-            <div class="mt-4 pt-4 border-t border-gray-200">
-              <p class="text-sm text-gray-600">Last refresh: {{ new Date().toLocaleTimeString() }}</p>
+            <div class="health-item">
+              <div class="health-status healthy"></div>
+              <div>
+                <p class="health-label">Authentication</p>
+                <p class="health-value">Active</p>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </main>
-  </div>
-
-  <!-- Redirect to login if not authenticated -->
-  <div v-else class="min-h-screen bg-gray-100 flex items-center justify-center">
-    <div class="text-center">
-      <p class="text-gray-600 mb-4">Redirecting to login...</p>
-      <svg class="animate-spin h-8 w-8 text-red-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-    </div>
   </div>
 </template>
 
 <style scoped>
-/* Add any component-specific styles here */
+.dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.dashboard-header {
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  color: white;
+  padding: 40px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.dashboard-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+.header-subtitle {
+  font-size: 16px;
+  margin: 0;
+  opacity: 0.95;
+}
+
+.logout-btn {
+  background-color: #ff5252;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.logout-btn:hover {
+  background-color: #ff1744;
+  box-shadow: 0 4px 12px rgba(255, 82, 82, 0.4);
+}
+
+.logout-btn:active {
+  transform: scale(0.98);
+}
+
+.dashboard-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.loading-container {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 16px;
+}
+
+.dashboard-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.dashboard-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  color: #333;
+}
+
+/* Alert Styles */
+.alert {
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.alert-danger {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef5350;
+}
+
+/* Stats Section */
+.stats-section {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.patients-icon {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.doctors-icon {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.receptionists-icon {
+  background-color: #e8f5e9;
+  color: #388e3c;
+}
+
+.appointments-icon {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: #333;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #999;
+  margin: 4px 0 0 0;
+}
+
+/* Appointment Stats */
+.appointment-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+.stat-number {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.stat-number.upcoming {
+  color: #f57c00;
+}
+
+.stat-number.completed {
+  color: #388e3c;
+}
+
+.stat-text {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Management Grid */
+.management-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.management-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.management-btn svg {
+  width: 32px;
+  height: 32px;
+  color: #2196F3;
+}
+
+.management-btn:hover {
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  border-color: #1976d2;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
+}
+
+.management-btn:hover svg {
+  color: white;
+}
+
+.management-btn:active {
+  transform: translateY(0);
+}
+
+/* Health Grid */
+.health-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.health-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+.health-status {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.health-status.healthy {
+  background-color: #4caf50;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
+}
+
+.health-label {
+  font-size: 12px;
+  color: #999;
+  margin: 0;
+  font-weight: 500;
+}
+
+.health-value {
+  font-size: 14px;
+  color: #333;
+  margin: 4px 0 0 0;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-header {
+    padding: 30px 16px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 24px;
+  }
+
+  .header-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .logout-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .dashboard-content {
+    padding: 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .management-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid,
+  .management-grid,
+  .health-grid,
+  .appointment-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .stat-icon {
+    width: 56px;
+    height: 56px;
+  }
+}
 </style>

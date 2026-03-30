@@ -70,14 +70,23 @@ export const useDoctorStore = defineStore('doctor', () => {
   }
 
   // Logout
-  const logout = () => {
-    token.value = null
-    doctor.value = null
-    patients.value = []
-    appointments.value = []
-    dashboardStats.value = null
-    localStorage.removeItem('doctorToken')
-    localStorage.removeItem('doctor')
+  const logout = async () => {
+    try {
+      // Call the logout API endpoint
+      await doctorAPI.logout()
+    } catch (err) {
+      console.error('[DOCTOR STORE] Logout API error:', err.message)
+      // Continue with logout even if API call fails
+    } finally {
+      // Clear local state
+      token.value = null
+      doctor.value = null
+      patients.value = []
+      appointments.value = []
+      dashboardStats.value = null
+      localStorage.removeItem('doctorToken')
+      localStorage.removeItem('doctor')
+    }
   }
 
   // Get assigned patients

@@ -43,15 +43,22 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       // Check if it's admin login
       if (email === 'adminsterling@gmail.com') {
+        console.log('[AUTH_STORE] Admin login detected')
         const response = await adminAPI.login(email, password)
+        console.log('[AUTH_STORE] Admin login response:', {
+          token: response.data.token ? response.data.token.substring(0, 20) + '...' : 'null',
+          admin: response.data.admin
+        })
         token.value = response.data.token
         admin.value = response.data.admin
         userType.value = 'admin'
         localStorage.setItem('authToken', token.value)
         localStorage.setItem('admin', JSON.stringify(admin.value))
         localStorage.setItem('userType', 'admin')
+        console.log('[AUTH_STORE] Admin data saved to localStorage and state')
         return response.data
       } else {
+        console.log('[AUTH_STORE] Patient login detected')
         // Patient login
         const response = await authAPI.signin({ email, password })
         token.value = response.data.token
@@ -63,6 +70,11 @@ export const useAuthStore = defineStore('auth', () => {
         return response.data
       }
     } catch (err) {
+      console.error('[AUTH_STORE] Signin error:', {
+        status: err.response?.status,
+        message: err.response?.data?.message,
+        error: err.message
+      })
       error.value = err.response?.data?.message || 'Sign in failed'
       throw err
     } finally {

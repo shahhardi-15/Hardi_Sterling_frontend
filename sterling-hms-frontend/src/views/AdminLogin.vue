@@ -26,18 +26,24 @@ const handleLogin = async () => {
   }
 
   try {
+    console.log('[ADMIN_LOGIN] Attempting login with email:', email.value)
     const result = await authStore.signin(email.value, password.value)
-    console.log('Login successful:', result)
-    console.log('Auth store state:', {
-      token: authStore.token,
+    console.log('[ADMIN_LOGIN] Login successful')
+    console.log('[ADMIN_LOGIN] Auth store state after login:', {
+      token: authStore.token ? authStore.token.substring(0, 20) + '...' : 'null',
       userType: authStore.userType,
       isAdmin: authStore.isAdmin,
       isAuthenticated: authStore.isAuthenticated
     })
+    console.log('[ADMIN_LOGIN] localStorage state:', {
+      authToken: localStorage.getItem('authToken') ? localStorage.getItem('authToken').substring(0, 20) + '...' : 'null',
+      userType: localStorage.getItem('userType'),
+      admin: localStorage.getItem('admin') ? 'present' : 'null'
+    })
     // Redirect to admin dashboard after successful login
     await router.push('/admin/dashboard')
   } catch (err) {
-    console.error('Login error:', err)
+    console.error('[ADMIN_LOGIN] Login error:', err)
     localError.value = authStore.error || 'Incorrect password'
   }
 }

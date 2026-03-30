@@ -3,8 +3,15 @@
     <!-- Header -->
     <header class="dashboard-header">
       <div class="header-content">
-        <h1>Doctor Dashboard</h1>
-        <p class="header-subtitle">Welcome, {{ doctorStore.doctor?.name || 'Doctor' }}</p>
+        <div class="header-top">
+          <div>
+            <h1>Doctor Dashboard</h1>
+            <p class="header-subtitle">Welcome, {{ doctorStore.doctor?.name || 'Doctor' }}</p>
+          </div>
+          <button @click="handleLogout" class="logout-btn">
+            Logout
+          </button>
+        </div>
       </div>
     </header>
 
@@ -56,6 +63,16 @@ const doctorStore = useDoctorStore()
 const loading = ref(false)
 const error = ref('')
 
+const handleLogout = async () => {
+  try {
+    await doctorStore.logout()
+    router.push('/login')
+  } catch (err) {
+    console.error('Logout error:', err)
+    router.push('/login')
+  }
+}
+
 onMounted(() => {
   // Initialize auth from storage
   doctorStore.initializeAuth()
@@ -90,6 +107,13 @@ onMounted(() => {
   margin: 0 auto;
 }
 
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
 .dashboard-header h1 {
   font-size: 32px;
   font-weight: 700;
@@ -100,6 +124,28 @@ onMounted(() => {
   font-size: 16px;
   margin: 0;
   opacity: 0.95;
+}
+
+.logout-btn {
+  background-color: #ff5252;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.logout-btn:hover {
+  background-color: #ff1744;
+  box-shadow: 0 4px 12px rgba(255, 82, 82, 0.4);
+}
+
+.logout-btn:active {
+  transform: scale(0.98);
 }
 
 .dashboard-content {

@@ -64,6 +64,14 @@ const doctorAPI = {
     })
     return response
   },
+
+  // Logout
+  async logout() {
+    const response = await axios.post(`${API_BASE_URL}/doctor/logout`, {}, {
+      headers: this._getAuthHeaders(),
+    })
+    return response
+  },
 }
 
 export default doctorAPI
