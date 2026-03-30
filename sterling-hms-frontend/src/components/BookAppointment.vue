@@ -133,12 +133,12 @@
             <div v-else class="slots-grid">
               <button 
                 v-for="slot in filteredSlots" 
-                :key="`${slot.doctorId}-${slot.slotDate}-${slot.time}`"
+                :key="slot"
                 type="button"
-                :class="['slot-btn', { 'selected': form.timeSlot === slot.time }]"
-                @click.prevent="form.timeSlot = slot.time"
+                :class="['slot-btn', { 'selected': form.timeSlot === slot }]"
+                @click.prevent="form.timeSlot = slot"
               >
-                {{ slot.time }}
+                {{ slot }}
               </button>
             </div>
           </div>
@@ -222,11 +222,8 @@ const today = computed(() => {
 })
 
 const filteredSlots = computed(() => {
-  return availableTimeSlots.value.map((slot) => ({
-    time: slot,
-    doctorId: parseInt(form.value.doctorId),
-    slotDate: form.value.appointmentDate
-  }))
+  // availableTimeSlots.value now contains just the time strings (e.g., "09:00", "10:30")
+  return availableTimeSlots.value
 })
 
 const isFormValid = computed(() => {
@@ -299,22 +296,58 @@ const selectSpecialization = async (specialization) => {
 const onDateChange = async () => {
   form.value.timeSlot = ''
   if (form.value.doctorId && form.value.appointmentDate) {
-    generateRandomTimeSlots()
+    await fetchAvailableSlots()
   }
 }
 
-const generateRandomTimeSlots = () => {
-  const timeSlots = [
-    '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM',
-    '11:00 AM', '11:30 AM', '12:00 PM', '02:00 PM',
-    '02:30 PM', '03:00 PM', '03:30 PM', '04:00 PM',
-    '04:30 PM', '05:00 PM', '05:30 PM'
-  ]
-  
-  // Randomly select 3-4 time slots
-  const numSlots = Math.floor(Math.random() * 2) + 3 // 3 or 4
-  const shuffled = [...timeSlots].sort(() => 0.5 - Math.random())
-  availableTimeSlots.value = shuffled.slice(0, numSlots)
+const fetchAvailableSlots = async () => {
+  try {
+    loading.value = true
+    const doctorId = parseInt(form.value.doctorId)
+    const selectedDate = form.value.appointmentDate
+    
+    console.log('🔍 Fetching slots for:', { doctorId, selectedDate })
+    
+    // Fetch all available slots for the doctor from backend API
+    await appointmentStore.getAvailableSlots(doctorId)
+    
+    console.log('📊 All slots from backend:', appointmentStore.availableSlots.length, 'slots')
+    if (appointmentStore.availableSlots.length > 0) {
+      console.log('Sample slot:', appointmentStore.availableSlots[0])
+    }
+    
+    // Filter slots for the selected date and extract time slots only
+    // Handle date format: backend returns ISO 8601 (2026-03-30T00:00:00Z) but we need YYYY-MM-DD
+    const filteredByDate = appointmentStore.availableSlots
+      .filter(slot => {
+        // Normalize slot date to YYYY-MM-DD format
+        let slotDateStr = slot.slotDate
+        if (slotDateStr && slotDateStr.includes('T')) {
+          // If it's ISO 8601 format, extract just the date part
+          slotDateStr = slotDateStr.split('T')[0]
+        }
+        const matches = slotDateStr === selectedDate && slot.isAvailable
+        return matches
+      })
+      .map(slot => slot.timeSlot)
+    
+    console.log('✅ Filtered slots for date:', { selectedDate, count: filteredByDate.length, slots: filteredByDate })
+    availableTimeSlots.value = filteredByDate
+    
+    if (filteredByDate.length === 0) {
+      console.warn(`⚠️ No available slots for doctor ${doctorId} on ${selectedDate}`)
+      console.log('Debug: First 5 slots from backend:', appointmentStore.availableSlots.slice(0, 5).map(s => {
+        const dateNormalized = s.slotDate && s.slotDate.includes('T') ? s.slotDate.split('T')[0] : s.slotDate
+        return { date: dateNormalized, time: s.timeSlot, available: s.isAvailable }
+      }))
+    }
+  } catch (err) {
+    console.error('❌ Failed to fetch available slots:', err)
+    error.value = 'Failed to fetch available slots'
+    availableTimeSlots.value = []
+  } finally {
+    loading.value = false
+  }
 }
 
 const submitBooking = async () => {
@@ -328,15 +361,23 @@ const submitBooking = async () => {
 
   try {
     submitting.value = true
-    await appointmentStore.bookAppointment({
+    const bookingData = {
       doctorId: parseInt(form.value.doctorId),
       appointmentDate: form.value.appointmentDate,
       timeSlot: form.value.timeSlot,
       reason: form.value.reason,
       notes: form.value.notes || ''
-    })
+    }
+    console.log('📅 Booking appointment:', bookingData)
+    
+    await appointmentStore.bookAppointment(bookingData)
 
     successMessage.value = 'Appointment booked successfully!'
+    console.log('✅ Booking successful')
+    
+    // Refresh appointment history so newly booked appointment appears immediately
+    await appointmentStore.getHistory(1, 10)
+    
     // Reset form
     form.value = {
       specialization: '',
@@ -353,6 +394,7 @@ const submitBooking = async () => {
       successMessage.value = ''
     }, 3000)
   } catch (err) {
+    console.error('❌ Booking failed:', err)
     error.value = err.response?.data?.message || 'Failed to book appointment'
   } finally {
     submitting.value = false
