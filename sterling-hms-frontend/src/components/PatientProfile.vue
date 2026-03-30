@@ -163,14 +163,14 @@ const logout = async () => {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 32px;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
 }
 
 .profile-info {
@@ -270,7 +270,7 @@ const logout = async () => {
 .stat-value {
   font-size: 28px;
   font-weight: 700;
-  color: #4CAF50;
+  color: #2196F3;
 }
 
 .stat-label {

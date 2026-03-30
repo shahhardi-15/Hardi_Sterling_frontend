@@ -373,7 +373,7 @@ const submitBooking = async () => {
   font-weight: 700;
   margin-bottom: 24px;
   color: #333;
-  border-bottom: 3px solid #4CAF50;
+  border-bottom: 3px solid #2196F3;
   padding-bottom: 12px;
 }
 
@@ -390,7 +390,7 @@ const submitBooking = async () => {
   padding: 16px;
   background: #f9f9f9;
   border-radius: 8px;
-  border-left: 4px solid #4CAF50;
+  border-left: 4px solid #2196F3;
   overflow: visible;
 }
 
@@ -426,8 +426,8 @@ const submitBooking = async () => {
 
 .form-control:focus {
   outline: none;
-  border-color: #4CAF50;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  border-color: #2196F3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
   overflow: visible;
 }
 
@@ -448,15 +448,15 @@ const submitBooking = async () => {
 }
 
 .doctor-card:hover {
-  border-color: #4CAF50;
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+  border-color: #2196F3;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
   transform: translateY(-2px);
 }
 
 .doctor-card.selected {
-  border-color: #4CAF50;
-  background: #f0f8f3;
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  border-color: #2196F3;
+  background: #e3f2fd;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
 }
 
 .doctor-card-header {
@@ -468,7 +468,7 @@ const submitBooking = async () => {
 .doctor-avatar {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #4CAF50, #45a049);
+  background: linear-gradient(135deg, #2196F3, #1976D2);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -538,15 +538,15 @@ const submitBooking = async () => {
 
 /* Doctor Details Card */
 .doctor-details-section {
-  background: linear-gradient(135deg, #f0f8f3, #e8f5e9);
-  border-left-color: #2e7d32;
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+  border-left-color: #1565c0;
 }
 
 .doctor-details-card {
   padding: 20px;
   background: white;
   border-radius: 8px;
-  border: 2px solid #4CAF50;
+  border: 2px solid #2196F3;
 }
 
 .details-header {
@@ -560,7 +560,7 @@ const submitBooking = async () => {
 .details-avatar {
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, #4CAF50, #45a049);
+  background: linear-gradient(135deg, #2196F3, #1976D2);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -584,7 +584,7 @@ const submitBooking = async () => {
 
 .details-spec {
   font-size: 14px;
-  color: #4CAF50;
+  color: #2196F3;
   font-weight: 600;
   margin: 0;
 }
@@ -662,13 +662,13 @@ const submitBooking = async () => {
 }
 
 .slot-btn:hover {
-  border-color: #4CAF50;
-  color: #4CAF50;
+  border-color: #2196F3;
+  color: #2196F3;
 }
 
 .slot-btn.selected {
-  background: #4CAF50;
-  border-color: #4CAF50;
+  background: #2196F3;
+  border-color: #2196F3;
   color: white;
   font-weight: 600;
 }
@@ -698,13 +698,13 @@ const submitBooking = async () => {
 }
 
 .btn-primary {
-  background: #4CAF50;
+  background: #2196F3;
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #45a049;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  background: #1976D2;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
 }
 
 .btn-large {
@@ -763,12 +763,12 @@ const submitBooking = async () => {
 }
 
 .custom-select-input:hover {
-  border-color: #4CAF50;
+  border-color: #2196F3;
 }
 
 .custom-select-input.active {
-  border-color: #4CAF50;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  border-color: #2196F3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
 }
 
 .dropdown-arrow {
@@ -813,7 +813,7 @@ const submitBooking = async () => {
 .custom-option:hover {
   background: #f5f5f5;
   padding-left: 16px;
-  color: #4CAF50;
+  color: #2196F3;
   font-weight: 500;
 }
 </style>

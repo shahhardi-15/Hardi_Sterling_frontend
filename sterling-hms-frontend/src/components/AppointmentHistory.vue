@@ -224,7 +224,7 @@ const cancelAppointment = async (appointmentId) => {
 }
 
 .link {
-  color: #4CAF50;
+  color: #2196F3;
   text-decoration: none;
   font-weight: 600;
 }
@@ -250,8 +250,8 @@ const cancelAppointment = async (appointmentId) => {
 
 .filter-select:focus {
   outline: none;
-  border-color: #4CAF50;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  border-color: #2196F3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
 }
 
 .appointments-table {
@@ -362,8 +362,8 @@ const cancelAppointment = async (appointmentId) => {
 }
 
 .pagination-btn:hover:not(:disabled) {
-  border-color: #4CAF50;
-  color: #4CAF50;
+  border-color: #2196F3;
+  color: #2196F3;
 }
 
 .pagination-btn:disabled {

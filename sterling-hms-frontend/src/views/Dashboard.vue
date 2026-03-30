@@ -81,7 +81,7 @@ onMounted(() => {
 }
 
 .dashboard-header {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
   color: white;
   padding: 40px 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
