@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useReceptionistStore } from '@/stores/receptionist'
 import { useDoctorStore } from '@/stores/doctor'
+import { BriefcaseIcon } from '@heroicons/vue/24/solid'
 import adminAPI from '@/api/admin'
 
 console.log('[LOGIN.VUE] Initializing...')
@@ -146,357 +147,648 @@ console.log('[LOGIN.VUE] Script setup complete')
 
 <template>
   <div class="login-page">
-    <!-- Header -->
-    <header class="login-header">
-      <div class="header-content">
-        <div class="logo-section">
-          <span class="logo-icon">🏥</span>
-          <div>
-            <h1>Sterling HMS</h1>
-            <p class="subtitle">Hospital Management System</p>
-          </div>
-        </div>
+    <!-- SECTION 1: TOP NAVBAR -->
+    <nav class="navbar">
+      <div class="navbar-content">
+        <span class="navbar-title">Sterling Hospital Management System</span>
       </div>
-    </header>
+    </nav>
 
-    <!-- Main Content -->
-    <main class="login-content">
-      <div class="login-card">
-        <h2 class="card-title">Welcome Back</h2>
-        <p class="card-subtitle">Sign in to your account</p>
-
-        <!-- Error Message -->
-        <div v-if="localError" class="alert alert-danger">
-          <svg class="alert-icon" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-          </svg>
-          <span>{{ localError }}</span>
-        </div>
-
-        <!-- Login Form -->
-        <form @submit.prevent="handleLogin" class="form-group">
-          <!-- Email Input -->
-          <div class="form-field">
-            <label for="email" class="form-label">Email Address</label>
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              autocomplete="email"
-              required
-              :disabled="authStore.loading"
-              class="form-input"
-              placeholder="you@example.com"
-              @keypress="handleKeyPress"
-            />
-          </div>
-
-          <!-- Password Input -->
-          <div class="form-field">
-            <label for="password" class="form-label">Password</label>
-            <div class="password-input-wrapper">
-              <input
-                id="password"
-                v-model="password"
-                :type="showPassword ? 'text' : 'password'"
-                autocomplete="current-password"
-                required
-                :disabled="authStore.loading"
-                class="form-input"
-                placeholder="••••••••"
-                @keypress="handleKeyPress"
-              />
-              <button
-                type="button"
-                class="password-toggle-btn"
-                @click="showPassword = !showPassword"
-                :disabled="authStore.loading"
-                :title="showPassword ? 'Hide password' : 'Show password'"
-              >
-                <svg v-if="showPassword" class="toggle-icon" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-                  <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
-                </svg>
-                <svg v-else class="toggle-icon" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd"></path>
-                  <path d="M15.171 13.576l1.414 1.414A10.025 10.025 0 0020 10c-1.274-4.057-5.064-7-9.542-7a9.97 9.97 0 00-3.516.618l2.049 2.049a4 4 0 015.514 5.515z"></path>
-                </svg>
-              </button>
+    <!-- SECTION 2: MAIN CONTENT -->
+    <main class="main-content">
+      <div class="main-card">
+        <!-- LEFT PANEL -->
+        <div class="card-left">
+          <!-- TOP AREA -->
+          <div class="left-top">
+            <!-- Medical Icon -->
+            <div class="medical-icon-box">
+              <BriefcaseIcon class="medical-icon" />
             </div>
+
+            <!-- Heading -->
+            <h1 class="left-heading">
+              Clinical Excellence<br />at Your Fingertips.
+            </h1>
+
+            <!-- Description -->
+            <p class="left-description">
+              Access the Sterling ecosystem with secure, high-performance administrative tools designed for modern healthcare professionals.
+            </p>
           </div>
 
-          <!-- Remember Me & Forgot Password -->
-          <div class="form-options">
-            <label class="checkbox-label">
-              <input
-                v-model="rememberMe"
-                type="checkbox"
-                :disabled="authStore.loading"
-                class="checkbox-input"
-              />
-              <span>Remember me</span>
-            </label>
-            <button
-              type="button"
-              @click="router.push('/forgot-password')"
-              class="forgot-password-link"
-            >
-              Forgot password?
-            </button>
-          </div>
-
-          <!-- Login Button -->
-          <button
-            type="submit"
-            :disabled="authStore.loading"
-            class="btn btn-primary btn-block"
-          >
-            <span v-if="!authStore.loading">Sign In</span>
-            <span v-else class="flex items-center justify-center space-x-2">
-              <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          <!-- BOTTOM AREA -->
+          <div class="left-bottom">
+            <div class="divider-line"></div>
+            <div class="system-status">
+              <svg class="status-icon" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
               </svg>
-              <span>Signing in...</span>
-            </span>
-          </button>
-        </form>
-
-        <!-- Demo Credentials Info -->
-        <div class="demo-credentials">
-          <p class="demo-title">📋 Demo Credentials - Try all roles:</p>
-          <div class="credentials-list">
-            <div class="credential-item">
-              <strong>👤 Patient</strong>
-              <span>Email: patient1@example.com | Password: password123</span>
-            </div>
-            <div class="credential-item">
-              <strong>🩺 Doctor</strong>
-              <span>Email: testpat@example.com | Password: TestPass@123</span>
-            </div>
-            <div class="credential-item">
-              <strong>👨‍⚕️ Receptionist</strong>
-              <span>Email: receptionist@sterling.com | Password: Receptionist@Sterling2026</span>
-            </div>
-            <div class="credential-item">
-              <strong>🔐 Admin</strong>
-              <span>Email: adminsterling@gmail.com | Password: admin@123</span>
+              <span class="status-text">SYSTEM STATUS: OPTIMAL</span>
             </div>
           </div>
         </div>
 
-        <!-- Divider -->
-        <div class="divider">
-          <span>Need an account?</span>
-        </div>
+        <!-- RIGHT PANEL -->
+        <div class="card-right">
+          <!-- Heading -->
+          <h2 class="right-heading">Welcome Back</h2>
 
-        <!-- Sign Up Link -->
-        <router-link to="/signup" class="btn btn-secondary btn-block">
-          Create Account
-        </router-link>
+          <!-- Subtitle -->
+          <p class="right-subtitle">
+            Please enter your credentials to access your dashboard.
+          </p>
+
+          <!-- Error Message -->
+          <div v-if="localError" class="alert alert-danger">
+            <svg class="alert-icon" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+            <span>{{ localError }}</span>
+          </div>
+
+          <!-- Login Form -->
+          <form @submit.prevent="handleLogin" class="login-form">
+            <!-- EMAIL ID FIELD -->
+            <div class="form-field">
+              <div class="label-row">
+                <label for="email" class="form-label">EMAIL ID</label>
+              </div>
+              <div class="input-wrapper">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                </svg>
+                <input
+                  id="email"
+                  v-model="email"
+                  type="email"
+                  autocomplete="email"
+                  required
+                  :disabled="authStore.loading"
+                  class="form-input"
+                  placeholder="doctor.name@sterling.com"
+                  @keypress="handleKeyPress"
+                />
+              </div>
+            </div>
+
+            <!-- PASSWORD FIELD -->
+            <div class="form-field">
+              <div class="label-row">
+                <label for="password" class="form-label">PASSWORD</label>
+                <button
+                  type="button"
+                  @click="router.push('/forgot-password')"
+                  class="forgot-password-link"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+              <div class="input-wrapper">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input
+                  id="password"
+                  v-model="password"
+                  :type="showPassword ? 'text' : 'password'"
+                  autocomplete="current-password"
+                  required
+                  :disabled="authStore.loading"
+                  class="form-input"
+                  placeholder="••••••••"
+                  @keypress="handleKeyPress"
+                />
+                <button
+                  type="button"
+                  class="password-toggle-btn"
+                  @click="showPassword = !showPassword"
+                  :disabled="authStore.loading"
+                  :title="showPassword ? 'Hide password' : 'Show password'"
+                >
+                  {{ showPassword ? 'Hide' : 'Show' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- REMEMBER ME CHECKBOX -->
+            <div class="remember-me-row">
+              <label class="checkbox-label">
+                <input
+                  v-model="rememberMe"
+                  type="checkbox"
+                  :disabled="authStore.loading"
+                  class="checkbox-input"
+                />
+                <span>Remember me</span>
+              </label>
+            </div>
+
+            <!-- SIGN IN BUTTON -->
+            <button
+              type="submit"
+              :disabled="authStore.loading"
+              class="btn-sign-in"
+            >
+              <span v-if="!authStore.loading">Sign In to Sterling →</span>
+              <span v-else class="loading-state">
+                <svg class="loading-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Signing in...</span>
+              </span>
+            </button>
+          </form>
+
+          <!-- CREATE ACCOUNT LINK -->
+          <button
+            type="button"
+            @click="router.push('/signup')"
+            class="create-account-link"
+          >
+            Create Account !
+          </button>
+        </div>
       </div>
     </main>
+
+    <!-- SECTION 3: BOTTOM FOOTER -->
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-left">
+          <p>© 2026 Sterling Clinical Excellence. All rights reserved.</p>
+        </div>
+        <div class="footer-right">
+          <a href="#" class="footer-link">Privacy Policy</a>
+          <a href="#" class="footer-link">Terms of Service</a>
+          <a href="#" class="footer-link">Help Center</a>
+          <a href="#" class="footer-link">Contact</a>
+        </div>
+      </div>
+    </footer>
   </div>
 </template>
 
 <style scoped>
+/* ================================================================
+   PAGE LAYOUT & BACKGROUND
+   ================================================================ */
+
 .login-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  display: flex;
+  flex-direction: column;
+  background-color: #EEF2F7;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
-.login-header {
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-  color: white;
-  padding: 30px 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+/* ================================================================
+   SECTION 1: TOP NAVBAR
+   ================================================================ */
+
+.navbar {
+  height: 60px;
+  width: 100%;
+  background-color: white;
+  border-bottom: 1px solid #E0E6EE;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
-.header-content {
+.navbar-content {
   max-width: 1200px;
+  width: 100%;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
   margin: 0 auto;
 }
 
-.logo-section {
-  display: flex;
-  align-items: center;
-  gap: 15px;
+.navbar-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1B5E8F;
+  letter-spacing: 0.02em;
 }
 
-.logo-icon {
-  font-size: 32px;
-}
+/* ================================================================
+   SECTION 2: MAIN CONTENT AREA
+   ================================================================ */
 
-.logo-section h1 {
-  font-size: 28px;
-  font-weight: 700;
-  margin: 0;
-  color: white;
-}
-
-.subtitle {
-  font-size: 14px;
-  margin: 5px 0 0 0;
-  opacity: 0.9;
-}
-
-.login-content {
+.main-content {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 110px);
   padding: 40px 20px;
+  min-height: 0;
 }
 
-.login-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  padding: 40px;
+.main-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 1060px;
+  height: auto;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
 }
 
-.card-title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
-  margin: 0 0 8px 0;
-  text-align: center;
-}
+/* ================================================================
+   LEFT PANEL (45% width)
+   ================================================================ */
 
-.card-subtitle {
-  font-size: 14px;
-  color: #666;
-  text-align: center;
-  margin: 0 0 24px 0;
-}
-
-.form-group {
+.card-left {
+  width: 45%;
+  background-color: #DAE6F2;
+  padding: 48px 40px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  justify-content: space-between;
 }
+
+.left-top {
+  display: flex;
+  flex-direction: column;
+}
+
+.medical-icon-box {
+  width: 44px;
+  height: 44px;
+  background-color: #1B3A6B;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+  flex-shrink: 0;
+}
+
+.medical-icon-box svg {
+  width: 22px;
+  height: 22px;
+  color: white;
+}
+
+.left-heading {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1A2B4A;
+  line-height: 1.25;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.01em;
+  text-align: left;
+}
+
+.left-description {
+  font-size: 14px;
+  font-weight: 400;
+  color: #4A5568;
+  line-height: 1.6;
+  margin: 0;
+  text-align: left;
+}
+
+.left-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.divider-line {
+  width: 120px;
+  height: 1px;
+  background-color: #A0B4C8;
+  margin-bottom: 16px;
+}
+
+.system-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #4A5568;
+  text-transform: uppercase;
+}
+
+.status-icon {
+  width: 16px;
+  height: 16px;
+  color: #4A5568;
+  flex-shrink: 0;
+}
+
+.status-text {
+  display: block;
+}
+
+/* ================================================================
+   RIGHT PANEL (55% width)
+   ================================================================ */
+
+.card-right {
+  width: 55%;
+  background-color: #FFFFFF;
+  padding: 56px 48px;
+  display: flex;
+  flex-direction: column;
+}
+
+.right-heading {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1A2B4A;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.01em;
+  text-align: left;
+}
+
+.right-subtitle {
+  font-size: 14px;
+  color: #718096;
+  margin: 0 0 36px 0;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ================================================================
+   FORM ELEMENTS
+   ================================================================ */
 
 .form-field {
+  margin-bottom: 24px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
 .form-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #4A5568;
+  margin-bottom: 8px;
+  text-transform: uppercase;
 }
 
-.form-input {
-  padding: 10px 14px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  outline: none;
-}
-
-.form-input:focus {
-  border-color: #2196F3;
-  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
-}
-
-.form-input:disabled {
-  background-color: #f5f5f5;
-  color: #999;
-}
-
-.form-options {
+.label-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 8px;
+}
+
+.label-row .form-label {
+  margin: 0;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: visible;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  width: 16px;
+  height: 16px;
+  color: #A0AEC0;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.form-input {
+  width: 100%;
+  height: 48px;
+  background-color: #F7F9FC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding-left: 44px;
+  padding-right: 44px;
   font-size: 14px;
-  margin-top: 10px;
+  color: #2D3748;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-input::placeholder {
+  color: #A0AEC0;
+}
+
+.form-input:focus {
+  border-color: #1B5E8F;
+  box-shadow: 0 0 0 3px rgba(27, 94, 143, 0.12);
+  background-color: white;
+}
+
+.form-input:disabled {
+  background-color: #F7F9FC;
+  color: #A0AEC0;
+  cursor: not-allowed;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: auto;
+  height: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1B5E8F;
+  font-size: 12px;
+  font-weight: 600;
+  user-select: none;
+  z-index: 1;
+  overflow: visible;
+  transition: color 0.2s ease;
+  pointer-events: auto;
+}
+
+.password-toggle-btn:hover:not(:disabled) {
+  color: #152D54;
+}
+
+.password-toggle-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ================================================================
+   REMEMBER ME & FORGOT PASSWORD
+   ================================================================ */
+
+.remember-me-row {
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
 }
 
 .checkbox-label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
-  color: #666;
+  font-size: 14px;
+  color: #4A5568;
   user-select: none;
 }
 
 .checkbox-input {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   cursor: pointer;
-  accent-color: #2196F3;
+  border: 1px solid #CBD5E0;
+  border-radius: 4px;
+  accent-color: #1B5E8F;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: white;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.checkbox-input:checked {
+  background-color: #1B5E8F;
+  border-color: #1B5E8F;
+}
+
+.checkbox-input:checked::after {
+  content: '✓';
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
 }
 
 .forgot-password-link {
   background: none;
   border: none;
-  color: #2196F3;
+  color: #1B5E8F;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 400;
   text-decoration: none;
-  transition: color 0.3s ease;
+  transition: all 0.2s ease;
   padding: 0;
+  letter-spacing: 0.02em;
 }
 
 .forgot-password-link:hover {
-  color: #1976D2;
   text-decoration: underline;
 }
 
-.btn {
-  padding: 12px 16px;
-  border: none;
-  border-radius: 8px;
+.forgot-password-link:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ================================================================
+   SIGN IN BUTTON
+   ================================================================ */
+
+.btn-sign-in {
+  width: 100%;
+  height: 52px;
+  background-color: #1B3A6B;
+  color: white;
   font-size: 15px;
   font-weight: 600;
+  border-radius: 8px;
+  border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   outline: none;
-  box-sizing: border-box;
-  text-decoration: none;
 }
 
-.btn:disabled {
-  opacity: 0.6;
+.btn-sign-in:hover:not(:disabled) {
+  background-color: #152D54;
+  transform: translateY(-1px);
+}
+
+.btn-sign-in:active:not(:disabled) {
+  transform: translateY(0px);
+}
+
+.btn-sign-in:disabled {
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-  color: white;
-  margin-top: 20px;
-}
-
-.btn-primary:hover:not(:disabled) {
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
-  transform: translateY(-2px);
-}
-
-.btn-secondary {
-  background: white;
-  color: #2196F3;
-  border: 2px solid #2196F3;
-  margin-top: 16px;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: #f0f7ff;
-}
-
-.btn-block {
+.create-account-link {
+  display: block;
   width: 100%;
+  margin-top: 16px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: #1B5E8F;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
 }
+
+.create-account-link:hover {
+  text-decoration: underline;
+  color: #1B5E8F;
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ================================================================
+   ERROR ALERT
+   ================================================================ */
 
 .alert {
   padding: 12px 16px;
@@ -505,13 +797,13 @@ console.log('[LOGIN.VUE] Script setup complete')
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .alert-danger {
-  background-color: #fee;
-  border: 1px solid #fcc;
-  color: #c33;
+  background-color: #FEE;
+  border: 1px solid #FCC;
+  color: #C33;
 }
 
 .alert-icon {
@@ -521,62 +813,165 @@ console.log('[LOGIN.VUE] Script setup complete')
   margin-top: 2px;
 }
 
-.demo-credentials {
-  background: #f0f7ff;
-  border: 1px solid #d0e8ff;
-  border-radius: 8px;
-  padding: 16px;
-  margin-top: 24px;
+/* ================================================================
+   SECTION 3: BOTTOM FOOTER
+   ================================================================ */
+
+.footer {
+  width: 100%;
+  background-color: white;
+  border-top: 1px solid #E0E6EE;
+  padding: 20px 40px;
+  flex-shrink: 0;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-left {
   font-size: 13px;
+  color: #718096;
+  letter-spacing: 0.03em;
+  margin: 0;
 }
 
-.demo-title {
-  font-weight: 600;
-  color: #2196F3;
-  margin: 0 0 12px 0;
+.footer-left p {
+  margin: 0;
 }
 
-.credentials-list {
+.footer-right {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  gap: 24px;
+  align-items: center;
 }
 
-.credential-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  color: #555;
+.footer-link {
+  font-size: 13px;
+  color: #718096;
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  transition: color 0.2s ease;
 }
 
-.credential-item strong {
-  color: #333;
+.footer-link:hover {
+  color: #1B5E8F;
 }
 
-.divider {
-  position: relative;
-  text-align: center;
-  margin: 24px 0 16px;
-  font-size: 14px;
-  color: #999;
+/* ================================================================
+   RESPONSIVE DESIGN
+   ================================================================ */
+
+/* Tablet: 768px to 1024px */
+@media (max-width: 1024px) {
+  .main-card {
+    max-width: 100%;
+    margin: 0 24px;
+  }
+
+  .card-left {
+    padding: 40px 32px;
+  }
+
+  .card-right {
+    padding: 40px 32px;
+  }
+
+  .left-heading {
+    font-size: 28px;
+  }
+
+  .left-description {
+    font-size: 13px;
+  }
+
+  .right-heading {
+    font-size: 24px;
+  }
+
+  .navbar-content,
+  .footer-content {
+    padding: 0 24px;
+  }
 }
 
-.divider::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: #ddd;
+/* Mobile: less than 768px */
+@media (max-width: 767px) {
+  .main-card {
+    flex-direction: column;
+    border-radius: 12px;
+  }
+
+  .card-left {
+    display: none;
+  }
+
+  .card-right {
+    width: 100%;
+    padding: 32px 24px;
+  }
+
+  .main-content {
+    padding: 20px 16px;
+  }
+
+  .navbar {
+    height: 56px;
+  }
+
+  .navbar-content {
+    padding: 0 16px;
+  }
+
+  .navbar-title {
+    font-size: 14px;
+  }
+
+  .right-heading {
+    font-size: 24px;
+  }
+
+  .right-subtitle {
+    margin-bottom: 24px;
+  }
+
+  .form-field {
+    margin-bottom: 16px;
+  }
+
+  .remember-me-row {
+    margin-bottom: 20px;
+  }
+
+  .footer {
+    padding: 16px 16px;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+    padding: 0 16px;
+  }
+
+  .footer-right {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .footer-link {
+    font-size: 12px;
+  }
 }
 
-.divider span {
-  position: relative;
-  background: white;
-  padding: 0 12px;
-  display: inline-block;
-}
+/* ================================================================
+   UTILITY CLASSES
+   ================================================================ */
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -584,50 +979,7 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
-input[type=number] {
+input[type='number'] {
   -moz-appearance: textfield;
-}
-
-.password-input-wrapper {
-  position: relative;
-  width: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.password-input-wrapper .form-input {
-  width: 100%;
-  padding-right: 44px;
-  box-sizing: border-box;
-}
-
-.password-toggle-btn {
-  position: absolute;
-  right: 10px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666;
-  transition: color 0.3s ease;
-  pointer-events: auto;
-}
-
-.password-toggle-btn:hover:not(:disabled) {
-  color: #2196F3;
-}
-
-.password-toggle-btn:disabled {
-  cursor: not-allowed;
-  color: #ccc;
-}
-
-.toggle-icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
 }
 </style>

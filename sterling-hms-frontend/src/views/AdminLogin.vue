@@ -125,14 +125,7 @@ const handleKeyPress = (e) => {
                 :disabled="authStore.loading"
                 :title="showPassword ? 'Hide password' : 'Show password'"
               >
-                <svg v-if="showPassword" class="toggle-icon" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-                  <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
-                </svg>
-                <svg v-else class="toggle-icon" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd"></path>
-                  <path d="M15.171 13.576l1.414 1.414A10.025 10.025 0 0020 10c-1.274-4.057-5.064-7-9.542-7a9.97 9.97 0 00-3.516.618l2.049 2.049a4 4 0 015.514 5.515z"></path>
-                </svg>
+                {{ showPassword ? 'Hide' : 'Show' }}
               </button>
             </div>
           </div>
@@ -436,6 +429,7 @@ input[type=number] {
   width: 100%;
   display: flex;
   align-items: center;
+  overflow: visible;
 }
 
 .password-input-wrapper .form-input {
@@ -446,26 +440,35 @@ input[type=number] {
 
 .password-toggle-btn {
   position: absolute;
-  right: 10px;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: auto;
+  height: auto;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #666;
+  color: #1B5E8F;
+  font-size: 12px;
+  font-weight: 600;
+  user-select: none;
+  z-index: 1;
+  overflow: visible;
   transition: color 0.3s ease;
   pointer-events: auto;
 }
 
 .password-toggle-btn:hover:not(:disabled) {
-  color: #2196F3;
+  color: #152D54;
 }
 
 .password-toggle-btn:disabled {
   cursor: not-allowed;
-  color: #ccc;
+  opacity: 0.6;
 }
 
 .toggle-icon {

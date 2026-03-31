@@ -16,6 +16,7 @@
         <select v-model="selectedStatus" class="filter-select">
           <option value="">All Statuses</option>
           <option value="scheduled">Scheduled</option>
+          <option value="pending">Pending Approval</option>
           <option value="completed">Completed</option>
           <option value="cancelled">Cancelled</option>
           <option value="no-show">No Show</option>
@@ -43,9 +44,18 @@
             <td>{{ appointment.doctor.specialization }}</td>
             <td>{{ appointment.reason }}</td>
             <td>
-              <span :class="['status-badge', `badge-${appointment.status}`]">
-                {{ formatStatus(appointment.status) }}
-              </span>
+              <div class="status-with-tooltip">
+                <span :class="['status-badge', `badge-${appointment.status}`]">
+                  {{ formatStatus(appointment.status) }}
+                </span>
+                <span 
+                  v-if="appointment.status === 'cancelled' && appointment.disapprovalReason"
+                  class="info-icon"
+                  :title="`Reason: ${appointment.disapprovalReason}`"
+                >
+                  ℹ
+                </span>
+              </div>
             </td>
             <td class="actions">
               <button 
@@ -161,7 +171,8 @@ const formatStatus = (status) => {
     'scheduled': 'Scheduled',
     'completed': 'Completed',
     'cancelled': 'Cancelled',
-    'no-show': 'No Show'
+    'no-show': 'No Show',
+    'pending': 'Pending Approval'
   }
   return statusMap[status] || status
 }
@@ -303,6 +314,11 @@ const cancelAppointment = async (appointmentId) => {
   color: #388e3c;
 }
 
+.badge-pending {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
 .badge-cancelled {
   background: #ffebee;
   color: #c62828;
@@ -311,6 +327,33 @@ const cancelAppointment = async (appointmentId) => {
 .badge-no-show {
   background: #fff3e0;
   color: #f57c00;
+}
+
+.status-with-tooltip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  color: #666;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: help;
+  border: 1px solid #ddd;
+  transition: all 0.2s;
+}
+
+.info-icon:hover {
+  background: #e0e0e0;
+  border-color: #999;
 }
 
 .actions {

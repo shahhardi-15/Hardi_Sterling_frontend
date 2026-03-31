@@ -372,7 +372,7 @@ const submitBooking = async () => {
     
     await appointmentStore.bookAppointment(bookingData)
 
-    successMessage.value = 'Appointment booked successfully!'
+    successMessage.value = 'Your appointment request has been submitted. Please wait for admin approval before your appointment is confirmed.'
     console.log('✅ Booking successful')
     
     // Refresh appointment history so newly booked appointment appears immediately
