@@ -269,499 +269,654 @@ const handlePhoneInput = (event) => {
 </script>
 
 <template>
-  <div class="modal-overlay">
-    <div class="modal-content">
-      <!-- Toast Notification -->
-      <div v-if="showSuccessToast" class="toast-notification">
+  <div class="slide-panel-overlay" @click="handleCancel"></div>
+  
+  <div class="slide-panel" :class="{ 'slide-panel-open': true }">
+    <!-- Panel Header -->
+    <div class="panel-header">
+      <div class="header-content">
+        <h2 class="panel-title">Add New Doctor</h2>
+        <p class="panel-subtitle">Onboard a new medical professional to the system.</p>
+      </div>
+      <button @click="handleCancel" class="close-btn">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Panel Body -->
+    <div class="panel-body">
+      <!-- Success Toast -->
+      <div v-if="showSuccessToast" class="toast success-toast">
         {{ toastMessage }}
       </div>
 
-      <!-- Modal Header -->
-      <div class="modal-header">
-        <h2>Add New Doctor</h2>
-        <button @click="handleCancel" class="close-btn">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      <!-- Section 1: Personal & Login Details -->
+      <div class="form-section">
+        <div class="section-header">
+          <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
           </svg>
-        </button>
-      </div>
-
-      <!-- Modal Body -->
-      <div class="modal-body">
-        <!-- Section 1: Personal & Login Details -->
-        <div class="form-section">
-          <h3 class="section-title">Personal & Login Details</h3>
-          <div class="form-grid">
-            <!-- Full Name -->
-            <div class="form-group">
-              <label for="full_name">Full Name <span class="required">*</span></label>
-              <input
-                id="full_name"
-                v-model="formData.full_name"
-                type="text"
-                class="form-input"
-                :class="{ 'input-error': errors.full_name }"
-                placeholder="Dr. John Doe"
-              />
-              <span v-if="errors.full_name" class="error-message">{{ errors.full_name }}</span>
-            </div>
-
-            <!-- Email -->
-            <div class="form-group">
-              <label for="email">Email <span class="required">*</span></label>
-              <input
-                id="email"
-                v-model="formData.email"
-                type="email"
-                class="form-input"
-                :class="{ 'input-error': errors.email }"
-                placeholder="doctor@example.com"
-              />
-              <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
-            </div>
-
-            <!-- Password -->
-            <div class="form-group">
-              <label for="password">Password <span class="required">*</span></label>
-              <input
-                id="password"
-                v-model="formData.password"
-                type="password"
-                class="form-input"
-                :class="{ 'input-error': errors.password }"
-                placeholder="Min. 8 characters"
-              />
-              <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
-            </div>
-
-            <!-- Phone -->
-            <div class="form-group">
-              <label for="phone">Phone Number <span class="required">*</span></label>
-              <input
-                id="phone"
-                type="tel"
-                class="form-input"
-                :class="{ 'input-error': errors.phone }"
-                placeholder="10-digit phone number"
-                @input="handlePhoneInput"
-              />
-              <span v-if="errors.phone" class="error-message">{{ errors.phone }}</span>
-            </div>
-          </div>
+          <h3 class="section-title">PERSONAL & LOGIN DETAILS</h3>
         </div>
 
-        <!-- Section 2: Professional Details -->
-        <div class="form-section">
-          <h3 class="section-title">Professional Details</h3>
-          <div class="form-grid">
-            <!-- Specialization -->
-            <div class="form-group">
-              <label for="specialization">Specialization <span class="required">*</span></label>
-              <input
-                id="specialization"
-                v-model="formData.specialization"
-                type="text"
-                class="form-input"
-                :class="{ 'input-error': errors.specialization }"
-                placeholder="e.g., Cardiology"
-              />
-              <span v-if="errors.specialization" class="error-message">{{ errors.specialization }}</span>
-            </div>
+        <!-- Full Name -->
+        <div class="form-group full-width">
+          <label class="form-label">FULL NAME<span class="required">*</span></label>
+          <input
+            id="full_name"
+            v-model="formData.full_name"
+            type="text"
+            class="form-input"
+            :class="{ 'input-error': errors.full_name }"
+            placeholder="Dr. Jane Doe"
+          />
+          <p v-if="errors.full_name" class="error-message">{{ errors.full_name }}</p>
+        </div>
 
-            <!-- Qualification -->
-            <div class="form-group">
-              <label for="qualification">Qualification <span class="required">*</span></label>
-              <input
-                id="qualification"
-                v-model="formData.qualification"
-                type="text"
-                class="form-input"
-                :class="{ 'input-error': errors.qualification }"
-                placeholder="e.g., MBBS, MD"
-              />
-              <span v-if="errors.qualification" class="error-message">{{ errors.qualification }}</span>
-            </div>
-
-            <!-- Registration Number -->
-            <div class="form-group">
-              <label for="registration_number">Registration No. <span class="required">*</span></label>
-              <input
-                id="registration_number"
-                v-model="formData.registration_number"
-                type="text"
-                class="form-input"
-                :class="{ 'input-error': errors.registration_number }"
-                placeholder="Medical council number"
-              />
-              <span v-if="errors.registration_number" class="error-message">{{ errors.registration_number }}</span>
-            </div>
-
-            <!-- Experience Years -->
-            <div class="form-group">
-              <label for="experience_years">Experience (Years) <span class="required">*</span></label>
-              <input
-                id="experience_years"
-                v-model.number="formData.experience_years"
-                type="number"
-                class="form-input"
-                :class="{ 'input-error': errors.experience_years }"
-                placeholder="0"
-                min="0"
-              />
-              <span v-if="errors.experience_years" class="error-message">{{ errors.experience_years }}</span>
-            </div>
-
-            <!-- Consultation Fee -->
-            <div class="form-group">
-              <label for="consultation_fee">Consultation Fee (₹) <span class="required">*</span></label>
-              <input
-                id="consultation_fee"
-                v-model.number="formData.consultation_fee"
-                type="number"
-                class="form-input"
-                :class="{ 'input-error': errors.consultation_fee }"
-                placeholder="0"
-                min="0"
-                step="0.01"
-              />
-              <span v-if="errors.consultation_fee" class="error-message">{{ errors.consultation_fee }}</span>
-            </div>
-
-            <!-- Department -->
-            <div class="form-group">
-              <label for="department_id">Department <span class="required">*</span></label>
-              <select
-                id="department_id"
-                v-model="formData.department_id"
-                class="form-input"
-                :class="{ 'input-error': errors.department_id }"
-              >
-                <option value="">Select a department</option>
-                <option v-for="dept in departments" :key="dept.id" :value="dept.id">
-                  {{ dept.name }}
-                </option>
-              </select>
-              <span v-if="errors.department_id" class="error-message">{{ errors.department_id }}</span>
-            </div>
-          </div>
-
-          <!-- Available Days -->
+        <!-- Email & Phone Number (Side by Side) -->
+        <div class="form-row">
           <div class="form-group">
-            <label>Available Days <span class="required">*</span></label>
-            <div class="checkboxes-grid">
-              <label v-for="day in daysOfWeek" :key="day" class="checkbox-label">
-                <input
-                  type="checkbox"
-                  :checked="isDaySelected(day)"
-                  @change="toggleDay(day)"
-                  class="checkbox-input"
-                />
-                <span class="checkbox-text">{{ day }}</span>
-              </label>
-            </div>
-            <span v-if="errors.available_days" class="error-message">{{ errors.available_days }}</span>
+            <label class="form-label">EMAIL<span class="required">*</span></label>
+            <input
+              id="email"
+              v-model="formData.email"
+              type="email"
+              class="form-input"
+              :class="{ 'input-error': errors.email }"
+              placeholder="jane.doe@sterling.com"
+            />
+            <p v-if="errors.email" class="error-message">{{ errors.email }}</p>
           </div>
 
-          <!-- Working Hours -->
-          <div class="form-grid">
-            <!-- Start Time -->
-            <div class="form-group">
-              <label for="start_time">Start Time <span class="required">*</span></label>
-              <input
-                id="start_time"
-                v-model="formData.start_time"
-                type="time"
-                class="form-input"
-                :class="{ 'input-error': errors.start_time }"
-              />
-              <span v-if="errors.start_time" class="error-message">{{ errors.start_time }}</span>
-            </div>
-
-            <!-- End Time -->
-            <div class="form-group">
-              <label for="end_time">End Time <span class="required">*</span></label>
-              <input
-                id="end_time"
-                v-model="formData.end_time"
-                type="time"
-                class="form-input"
-                :class="{ 'input-error': errors.end_time }"
-              />
-              <span v-if="errors.end_time" class="error-message">{{ errors.end_time }}</span>
-            </div>
-
-            <!-- Slot Duration -->
-            <div class="form-group">
-              <label for="slot_duration_minutes">Slot Duration <span class="required">*</span></label>
-              <select
-                id="slot_duration_minutes"
-                v-model.number="formData.slot_duration_minutes"
-                class="form-input"
-                :class="{ 'input-error': errors.slot_duration_minutes }"
-              >
-                <option :value="10">10 min</option>
-                <option :value="15">15 min</option>
-                <option :value="20">20 min</option>
-                <option :value="30">30 min</option>
-              </select>
-              <span v-if="errors.slot_duration_minutes" class="error-message">{{ errors.slot_duration_minutes }}</span>
-            </div>
+          <div class="form-group">
+            <label class="form-label">PHONE NUMBER<span class="required">*</span></label>
+            <input
+              id="phone"
+              type="tel"
+              class="form-input"
+              :class="{ 'input-error': errors.phone }"
+              placeholder="+91 98765 43210"
+              maxlength="10"
+              @input="handlePhoneInput"
+            />
+            <p v-if="errors.phone" class="error-message">{{ errors.phone }}</p>
           </div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group full-width">
+          <label class="form-label">PASSWORD<span class="required">*</span></label>
+          <input
+            id="password"
+            v-model="formData.password"
+            type="password"
+            class="form-input"
+            :class="{ 'input-error': errors.password }"
+            placeholder="••••••••••••"
+          />
+          <p v-if="errors.password" class="error-message">{{ errors.password }}</p>
         </div>
       </div>
 
-      <!-- Modal Footer -->
-      <div class="modal-footer">
-        <button @click="handleCancel" class="btn-secondary" :disabled="loading">
-          Cancel
-        </button>
-        <button @click="handleSubmit" class="btn-primary" :disabled="loading">
-          {{ loading ? 'Adding...' : 'Add Doctor' }}
-        </button>
+      <!-- Section 2: Professional Details -->
+      <div class="form-section">
+        <div class="section-header">
+          <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+          </svg>
+          <h3 class="section-title">PROFESSIONAL DETAILS</h3>
+        </div>
+
+        <!-- Specialization & Qualification (Side by Side) -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">SPECIALIZATION<span class="required">*</span></label>
+            <input
+              id="specialization"
+              v-model="formData.specialization"
+              type="text"
+              class="form-input"
+              :class="{ 'input-error': errors.specialization }"
+              placeholder="Select Specialist"
+            />
+            <p v-if="errors.specialization" class="error-message">{{ errors.specialization }}</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">QUALIFICATION<span class="required">*</span></label>
+            <input
+              id="qualification"
+              v-model="formData.qualification"
+              type="text"
+              class="form-input"
+              :class="{ 'input-error': errors.qualification }"
+              placeholder="MD, PhD"
+            />
+            <p v-if="errors.qualification" class="error-message">{{ errors.qualification }}</p>
+          </div>
+        </div>
+
+        <!-- Registration Number & Experience (Side by Side) -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">REGISTRATION NO.<span class="required">*</span></label>
+            <input
+              id="registration_number"
+              v-model="formData.registration_number"
+              type="text"
+              class="form-input"
+              :class="{ 'input-error': errors.registration_number }"
+              placeholder="MCI-123456"
+            />
+            <p v-if="errors.registration_number" class="error-message">{{ errors.registration_number }}</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">EXPERIENCE (YEARS)<span class="required">*</span></label>
+            <input
+              id="experience_years"
+              v-model.number="formData.experience_years"
+              type="number"
+              class="form-input"
+              :class="{ 'input-error': errors.experience_years }"
+              placeholder="10"
+              min="0"
+            />
+            <p v-if="errors.experience_years" class="error-message">{{ errors.experience_years }}</p>
+          </div>
+        </div>
+
+        <!-- Consultation Fee (Full Width) -->
+        <div class="form-group full-width">
+          <label class="form-label">CONSULTATION FEE (₹)<span class="required">*</span></label>
+          <input
+            id="consultation_fee"
+            v-model.number="formData.consultation_fee"
+            type="number"
+            class="form-input"
+            :class="{ 'input-error': errors.consultation_fee }"
+            placeholder="1500"
+            min="0"
+            step="0.01"
+          />
+          <p v-if="errors.consultation_fee" class="error-message">{{ errors.consultation_fee }}</p>
+        </div>
+
+        <!-- Available Days -->
+        <div class="form-group full-width">
+          <label class="form-label">AVAILABLE DAYS<span class="required">*</span></label>
+          <div class="days-grid">
+            <button
+              v-for="day in daysOfWeek"
+              :key="day"
+              type="button"
+              class="day-button"
+              :class="{ 'day-selected': isDaySelected(day) }"
+              @click="toggleDay(day)"
+            >
+              {{ day }}
+            </button>
+          </div>
+          <p v-if="errors.available_days" class="error-message">{{ errors.available_days }}</p>
+        </div>
+
+        <!-- Start Time & End Time (Side by Side) -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">START TIME<span class="required">*</span></label>
+            <input
+              id="start_time"
+              v-model="formData.start_time"
+              type="time"
+              class="form-input"
+              :class="{ 'input-error': errors.start_time }"
+            />
+            <p v-if="errors.start_time" class="error-message">{{ errors.start_time }}</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">END TIME<span class="required">*</span></label>
+            <input
+              id="end_time"
+              v-model="formData.end_time"
+              type="time"
+              class="form-input"
+              :class="{ 'input-error': errors.end_time }"
+            />
+            <p v-if="errors.end_time" class="error-message">{{ errors.end_time }}</p>
+          </div>
+        </div>
+
+        <!-- Department -->
+        <div class="form-group full-width">
+          <label class="form-label">DEPARTMENT<span class="required">*</span></label>
+          <div class="select-wrapper">
+            <select
+              id="department_id"
+              v-model="formData.department_id"
+              class="form-input"
+              :class="{ 'input-error': errors.department_id }"
+            >
+              <option value="">Select a department</option>
+              <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+                {{ dept.name }}
+              </option>
+            </select>
+            <svg class="select-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+          </div>
+          <p v-if="errors.department_id" class="error-message">{{ errors.department_id }}</p>
+        </div>
+
+        <!-- Slot Duration -->
+        <div class="form-group full-width">
+          <label class="form-label">SLOT DURATION<span class="required">*</span></label>
+          <div class="select-wrapper">
+            <select
+              id="slot_duration_minutes"
+              v-model.number="formData.slot_duration_minutes"
+              class="form-input"
+              :class="{ 'input-error': errors.slot_duration_minutes }"
+            >
+              <option :value="10">10 min</option>
+              <option :value="15">15 min</option>
+              <option :value="20">20 min</option>
+              <option :value="30">30 min</option>
+            </select>
+            <svg class="select-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+          </div>
+          <p v-if="errors.slot_duration_minutes" class="error-message">{{ errors.slot_duration_minutes }}</p>
+        </div>
       </div>
+    </div>
+
+    <!-- Panel Footer -->
+    <div class="panel-footer">
+      <button @click="handleCancel" class="btn-cancel" :disabled="loading">
+        Cancel
+      </button>
+      <button @click="handleSubmit" class="btn-save" :disabled="loading">
+        {{ loading ? 'Saving...' : 'Save Profile' }}
+      </button>
     </div>
   </div>
 </template>
 
 <style scoped>
-.modal-overlay {
+/* Slide Panel Overlay */
+.slide-panel-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  opacity: 1;
+  transition: opacity 0.3s ease;
 }
 
-.modal-content {
-  background: white;
-  border-radius: 8px;
-  max-width: 700px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-}
-
-.toast-notification {
+/* Slide Panel */
+.slide-panel {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  background-color: #4caf50;
-  color: white;
-  padding: 16px 24px;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  font-size: 14px;
-  font-weight: 600;
-  z-index: 2000;
-  animation: slideIn 0.3s ease;
+  top: 0;
+  right: 0;
+  width: 500px;
+  height: 100vh;
+  background: white;
+  border-left: 1px solid #E2E8F0;
+  border-radius: 12px 0 0 12px;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  will-change: transform;
 }
 
-@keyframes slideIn {
-  from {
-    transform: translateX(400px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+.slide-panel.slide-panel-open {
+  transform: translateX(0);
 }
 
-.modal-header {
-  border-bottom: 1px solid #eee;
-  padding: 20px 24px;
+/* Panel Header */
+.panel-header {
+  padding: 28px;
+  border-bottom: 1px solid #E2E8F0;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 16px;
+  flex-shrink: 0;
 }
 
-.modal-header h2 {
-  margin: 0;
-  font-size: 20px;
+.header-content {
+  flex: 1;
+}
+
+.panel-title {
+  font-size: 22px;
   font-weight: 700;
-  color: #333;
+  color: #1A2B4A;
+  margin: 0 0 6px 0;
+  padding: 0;
+}
+
+.panel-subtitle {
+  font-size: 13px;
+  color: #718096;
+  margin: 0;
+  padding: 0;
 }
 
 .close-btn {
-  background: none;
-  border: none;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  background: #F7F9FC;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
-  color: #666;
-  transition: all 0.3s;
+  cursor: pointer;
+  color: #4A5568;
+  padding: 0;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .close-btn:hover {
-  background-color: #f0f0f0;
-  color: #333;
+  background: #FFE4E6;
+  border-color: #FFE4E6;
+  color: #9F1239;
 }
 
 .close-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 14px;
+  height: 14px;
 }
 
-.modal-body {
-  padding: 24px;
+/* Panel Body */
+.panel-body {
+  padding: 28px;
+  overflow-y: auto;
+  flex: 1;
 }
 
+/* Toast */
+.toast {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  animation: toastSlideIn 0.3s ease-out;
+}
+
+.success-toast {
+  background-color: #DCFCE7;
+  color: #166534;
+  border: 1px solid #86EFAC;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Form Section */
 .form-section {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .form-section:last-child {
   margin-bottom: 0;
 }
 
-.section-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: #333;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0 0 16px 0;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #f0f0f0;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-group label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
-}
-
-.required {
-  color: #f44336;
-}
-
-.form-input,
-select {
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  font-family: inherit;
-  transition: all 0.3s;
-  background-color: white;
-}
-
-.form-input:focus,
-select:focus {
-  outline: none;
-  border-color: #2196F3;
-  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
-}
-
-.input-error {
-  border-color: #f44336 !important;
-  background-color: #fff5f5;
-}
-
-.error-message {
-  font-size: 12px;
-  color: #f44336;
-  margin-top: 4px;
-}
-
-.checkboxes-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  gap: 12px;
-}
-
-.checkbox-label {
+.section-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  cursor: pointer;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #F0F4F8;
+}
+
+.section-icon {
+  width: 16px;
+  height: 16px;
+  color: #1B5E8F;
+  flex-shrink: 0;
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #1B5E8F;
+  text-transform: uppercase;
+  margin: 0;
+  padding: 0;
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.form-group.full-width {
+  margin-bottom: 24px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #4A5568;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  padding: 0;
+  text-align: left;
+}
+
+.required {
+  color: #E53E3E;
+  margin-left: 2px;
+}
+
+/* Form Inputs */
+.form-input {
+  width: 100%;
+  height: 42px;
+  background: #F7F9FC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 0 14px;
   font-size: 14px;
-  color: #333;
+  color: #2D3748;
+  box-sizing: border-box;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s ease;
+  appearance: none;
+  text-align: left;
 }
 
-.checkbox-input {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  accent-color: #2196F3;
+.form-input::placeholder {
+  color: #A0AEC0;
 }
 
-.checkbox-text {
-  user-select: none;
+.form-input:focus {
+  border-color: #1B5E8F;
+  box-shadow: 0 0 0 3px rgba(27, 94, 143, 0.12);
+  background: white;
 }
 
-.modal-footer {
-  border-top: 1px solid #eee;
-  padding: 20px 24px;
+.form-input.input-error {
+  border-color: #F56565;
+}
+
+.form-input.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.12);
+}
+
+/* Select Wrapper for Chevron */
+.select-wrapper {
+  position: relative;
+}
+
+.select-chevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%) rotate(180deg);
+  width: 16px;
+  height: 16px;
+  color: #A0AEC0;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+select.form-input {
+  padding-right: 40px;
+  background-image: none;
+}
+
+select.form-input option {
+  padding: 10px;
+  background: white;
+  color: #2D3748;
+}
+
+/* Days Grid/Buttons */
+.days-grid {
   display: flex;
-  justify-content: flex-end;
-  gap: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
 }
 
-.btn-secondary {
-  padding: 10px 24px;
-  background-color: #f0f0f0;
-  color: #333;
-  border: none;
+.day-button {
+  background: #F7F9FC;
+  border: 1px solid #E2E8F0;
+  color: #4A5568;
   border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s ease;
+  min-width: 40px;
+  text-align: center;
 }
 
-.btn-secondary:hover:not(:disabled) {
-  background-color: #e0e0e0;
+.day-button:hover {
+  border-color: #1B5E8F;
+  color: #1B5E8F;
 }
 
-.btn-secondary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  padding: 10px 24px;
-  background-color: #2196F3;
+.day-button.day-selected {
+  background: #1B3A6B;
+  border-color: #1B3A6B;
   color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
   font-weight: 600;
+}
+
+/* Error Messages */
+.error-message {
+  color: #F56565;
+  font-size: 12px;
+  margin: 6px 0 0 0;
+  padding: 0;
+  text-align: left;
+}
+
+/* Panel Footer */
+.panel-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #F0F4F8;
+  margin-top: 8px;
+  padding: 16px 28px;
+  flex-shrink: 0;
+  background: white;
+}
+
+.btn-cancel {
+  background: white;
+  color: #4A5568;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 10px 24px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s ease;
 }
 
-.btn-primary:hover:not(:disabled) {
-  background-color: #1976D2;
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+.btn-cancel:hover:not(:disabled) {
+  background: #F7F9FC;
 }
 
-.btn-primary:disabled {
+.btn-cancel:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.btn-save {
+  background: #1B3A6B;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 28px;
+  cursor: pointer;
+  min-width: 140px;
+  transition: all 0.2s ease;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #152D54;
+  transform: translateY(-1px);
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .slide-panel {
+    width: 100%;
+    border-radius: 0;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
 </style>

@@ -159,6 +159,28 @@ const goToLastPage = () => {
   }
 }
 
+// Helper methods
+const getInitials = (name) => {
+  if (!name) return 'DR'
+  const parts = name.split(' ')
+  return parts.map(p => p[0]).join('').toUpperCase().slice(0, 2)
+}
+
+const getSpecializationClass = (specialization) => {
+  if (!specialization) return 'default'
+  const spec = specialization.toLowerCase()
+  if (spec.includes('cardio')) return 'cardiology'
+  if (spec.includes('neuro')) return 'neurology'
+  if (spec.includes('pediatric')) return 'pediatrics'
+  if (spec.includes('ortho')) return 'orthopedics'
+  return 'default'
+}
+
+const formatNumber = (num) => {
+  if (!num) return 0
+  return num.toLocaleString('en-IN')
+}
+
 const goToPreviousPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--
@@ -177,39 +199,50 @@ const goToNextPage = () => {
 <template>
   <AdminLayout>
     <div class="manage-doctors-container">
-      <!-- Header -->
-      <header class="page-header">
-        <div class="header-content">
-          <div class="header-top">
-            <h1>Manage Doctors</h1>
-          </div>
-        </div>
-      </header>
-
-      <!-- Main Content -->
-      <main class="page-content">
       <!-- Error Alert -->
       <div v-if="error" class="alert alert-danger">
         {{ error }}
       </div>
 
-      <!-- Search and Actions Row -->
-      <div class="search-actions-row">
-        <div class="search-container">
-          <input
-            type="text"
-            class="search-input"
-            placeholder="Search by name, specialization, or registration number..."
-            @input="handleSearch"
-          />
+      <!-- Page Header -->
+      <header class="page-header">
+        <div class="header-left">
+          <h1 class="page-title">Manage Doctors</h1>
+          <p class="page-subtitle">Oversee clinical staff, schedules, and professional credentials.</p>
         </div>
-        <button @click="showAddModal = true" class="btn-primary">
+        <button @click="showAddModal = true" class="btn-add-doctor">
+          <svg class="icon-plus" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"></path>
+          </svg>
           Add New Doctor
         </button>
+      </header>
+
+      <!-- Active Practitioners Stats Card -->
+      <div class="stats-card">
+        <h3 class="stats-title">Active Practitioners</h3>
+        <div class="stats-row">
+          <div class="stat-item">
+            <div class="stat-number">{{ totalDoctors }}</div>
+            <div class="stat-label">Total Doctors</div>
+          </div>
+          <div class="stat-divider"></div>
+          
+          <div class="stat-item">
+            <div class="stat-number">{{ doctors.filter(d => d.is_active).length }}</div>
+            <div class="stat-label">On Duty</div>
+          </div>
+          <div class="stat-divider"></div>
+          
+          <div class="stat-item">
+            <div class="stat-number">98%</div>
+            <div class="stat-label">Patient Satisfaction</div>
+          </div>
+        </div>
       </div>
 
-      <!-- Doctor Table Section -->
-      <div class="table-section">
+      <!-- Doctors Table Section -->
+      <div class="table-container">
         <div v-if="loading" class="loading-spinner">
           <div class="spinner"></div>
           <p>Loading doctors...</p>
@@ -224,114 +257,126 @@ const goToNextPage = () => {
           <p class="empty-submessage">Click "Add New Doctor" to add one.</p>
         </div>
 
-        <table v-else class="doctors-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Specialization</th>
-              <th>Qualification</th>
-              <th>Experience</th>
-              <th>Consultation Fee</th>
-              <th>Department</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="doctor in doctors" :key="doctor.id">
-              <td>{{ doctor.full_name || '-' }}</td>
-              <td>{{ doctor.specialization || '-' }}</td>
-              <td>{{ doctor.qualification || '-' }}</td>
-              <td>{{ doctor.experience_years || 0 }} years</td>
-              <td>₹{{ doctor.consultation_fee || 0 }}</td>
-              <td>{{ doctor.department_name || '-' }}</td>
-              <td>
-                <span :class="['status-badge', doctor.is_active ? 'active' : 'inactive']">
-                  {{ doctor.is_active ? 'Active' : 'Inactive' }}
-                </span>
-              </td>
-              <td class="actions-cell">
-                <button
-                  @click="openViewModal(doctor)"
-                  class="action-btn view-btn"
-                  title="View doctor details"
-                >
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                  </svg>
-                </button>
-                <button
-                  @click="openEditModal(doctor)"
-                  class="action-btn edit-btn"
-                  title="Edit doctor details"
-                >
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
-                </button>
-                <button
-                  @click="openToggleStatusModal(doctor)"
-                  class="action-btn toggle-btn"
-                  :title="doctor.is_active ? 'Deactivate doctor' : 'Activate doctor'"
-                >
-                  <svg v-if="doctor.is_active" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  <svg v-else fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M13 13h3v3h-3v-3zm0-8h3v3h-3V5zm1.5-2a10.5 10.5 0 1 0 0 21 10.5 10.5 0 0 0 0-21z"></path>
-                  </svg>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <template v-else>
+          <div class="table-wrapper">
+            <table class="doctors-table">
+              <thead>
+                <tr>
+                  <th class="th-doctor-name">Doctor Name</th>
+                  <th class="th-specialization">Specialization</th>
+                  <th class="th-qualification">Qualification</th>
+                  <th class="th-experience">Experience</th>
+                  <th class="th-fee">Fee</th>
+                  <th class="th-actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="doctor in doctors" :key="doctor.id" class="doctor-row">
+                  <!-- Doctor Name Column -->
+                  <td class="td-doctor-name">
+                    <div class="doctor-info">
+                      <div v-if="doctor.photo_url" class="doctor-avatar">
+                        <img :src="doctor.photo_url" :alt="doctor.full_name" />
+                      </div>
+                      <div v-else class="doctor-avatar-initials">
+                        {{ getInitials(doctor.full_name) }}
+                      </div>
+                      <div class="doctor-text">
+                        <div class="doctor-name">{{ doctor.full_name || '-' }}</div>
+                        <div class="doctor-id">ID: {{ doctor.doctor_id || 'N/A' }}</div>
+                      </div>
+                    </div>
+                  </td>
 
-        <!-- Pagination -->
-        <div v-if="!loading && doctors.length > 0" class="pagination">
-          <button
-            @click="goToFirstPage"
-            class="pagination-btn"
-            :disabled="currentPage === 1"
-          >
-            First
-          </button>
-          <button
-            @click="goToPreviousPage"
-            class="pagination-btn"
-            :disabled="currentPage === 1"
-          >
-            Previous
-          </button>
+                  <!-- Specialization Column -->
+                  <td class="td-specialization">
+                    <span :class="['specialization-badge', getSpecializationClass(doctor.specialization)]">
+                      {{ doctor.specialization || '-' }}
+                    </span>
+                  </td>
 
-          <span class="pagination-info">
-            Page {{ currentPage }} of {{ totalPages }}
-          </span>
+                  <!-- Qualification Column -->
+                  <td class="td-qualification">
+                    {{ doctor.qualification || '-' }}
+                  </td>
 
-          <button
-            @click="goToNextPage"
-            class="pagination-btn"
-            :disabled="currentPage === totalPages"
-          >
-            Next
-          </button>
-          <button
-            @click="goToLastPage"
-            class="pagination-btn"
-            :disabled="currentPage === totalPages"
-          >
-            Last
-          </button>
-        </div>
+                  <!-- Experience Column -->
+                  <td class="td-experience">
+                    {{ doctor.experience_years || 0 }} Yrs
+                  </td>
+
+                  <!-- Fee Column -->
+                  <td class="td-fee">
+                    ₹{{ formatNumber(doctor.consultation_fee) || 0 }}
+                  </td>
+
+                  <!-- Actions Column -->
+                  <td class="td-actions">
+                    <button
+                      @click="openViewModal(doctor)"
+                      class="action-link view-link"
+                      title="View doctor details"
+                    >
+                      View
+                    </button>
+                    <span class="action-separator">|</span>
+                    <button
+                      @click="openEditModal(doctor)"
+                      class="action-link edit-link"
+                      title="Edit doctor details"
+                    >
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Showing X of Y doctors -->
+          <div class="table-footer">
+            Showing {{ doctors.length }} of {{ totalDoctors }} doctors
+          </div>
+        </template>
       </div>
-    </main>
+
+      <!-- Pagination -->
+      <div v-if="!loading && doctors.length > 0" class="pagination">
+        <button
+          @click="goToFirstPage"
+          class="pagination-btn"
+          :disabled="currentPage === 1"
+        >
+          First
+        </button>
+        <button
+          @click="goToPreviousPage"
+          class="pagination-btn"
+          :disabled="currentPage === 1"
+        >
+          Previous
+        </button>
+
+        <span class="pagination-info">
+          Page {{ currentPage }} of {{ totalPages }}
+        </span>
+
+        <button
+          @click="goToNextPage"
+          class="pagination-btn"
+          :disabled="currentPage === totalPages"
+        >
+          Next
+        </button>
+        <button
+          @click="goToLastPage"
+          class="pagination-btn"
+          :disabled="currentPage === totalPages"
+        >
+          Last
+        </button>
+      </div>
+    </div>
 
     <!-- Modals -->
     <AddDoctorModal
@@ -359,47 +404,17 @@ const goToNextPage = () => {
       @close="showToggleStatusModal = false"
       @success="onToggleStatusSuccess"
     />
-    </div>
   </AdminLayout>
 </template>
 
 <style scoped>
 .manage-doctors-container {
-  min-height: 100%;
+  background: #F5F7FA;
+  padding: 32px 28px;
+  min-height: 100vh;
 }
 
-.page-header {
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-  color: white;
-  padding: 24px 0;
-  margin: -32px -28px 24px -28px;
-  padding: 24px 28px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.header-content {
-  max-width: none;
-  margin: 0;
-}
-
-.header-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.page-header h1 {
-  font-size: 32px;
-  font-weight: 700;
-  margin: 0;
-}
-
-.page-content {
-  max-width: none;
-  margin: 0;
-  padding: 0;
-}
-
+/* Error Alert */
 .alert {
   padding: 12px 20px;
   border-radius: 6px;
@@ -413,62 +428,122 @@ const goToNextPage = () => {
   border: 1px solid #ffcdd2;
 }
 
-.search-actions-row {
+/* Page Header */
+.page-header {
   display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
-  background: white;
-  padding: 16px 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
 }
 
-.search-container {
-  flex: 1;
+.header-left {
+  text-align: left;
 }
 
-.search-input {
-  width: 100%;
-  padding: 10px 16px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+.header-left h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1A2B4A;
+}
+
+.page-title {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1A2B4A;
+  text-align: left;
+}
+
+.page-subtitle {
+  margin: 0;
   font-size: 14px;
-  transition: border-color 0.3s;
+  color: #718096;
+  line-height: 1.6;
+  text-align: left;
 }
 
-.search-input:focus {
-  outline: none;
-  border-color: #2196F3;
-  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
-}
-
-.btn-primary {
-  padding: 10px 24px;
-  background-color: #2196F3;
+.btn-add-doctor {
+  background: #1B3A6B;
   color: white;
-  border: none;
-  border-radius: 6px;
   font-size: 14px;
   font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
 
-.btn-primary:hover {
-  background-color: #1976D2;
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+.btn-add-doctor:hover {
+  background: #152D54;
+  transform: translateY(-1px);
 }
 
-.btn-primary:active {
-  transform: scale(0.98);
+.icon-plus {
+  width: 18px;
+  height: 18px;
 }
 
-.table-section {
+/* Stats Card */
+.stats-card {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
+  padding: 24px 28px;
+  margin-bottom: 28px;
+}
+
+.stats-title {
+  margin: 0 0 20px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1A2B4A;
+}
+
+.stats-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.stat-item {
+  flex: 1;
+}
+
+.stat-number {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1A2B4A;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #A0AEC0;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 48px;
+  background: #E2E8F0;
+  margin: 0 32px;
+}
+
+/* Table Container */
+.table-container {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
   overflow: hidden;
+  margin-bottom: 16px;
 }
 
 .loading-spinner {
@@ -484,7 +559,7 @@ const goToNextPage = () => {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #2196F3;
+  border-top: 4px solid #1B3A6B;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -498,6 +573,299 @@ const goToNextPage = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 12px;
+}
+
+.empty-icon {
+  width: 64px;
+  height: 64px;
+  color: #ccc;
+  margin-bottom: 12px;
+}
+
+.empty-message {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.empty-submessage {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
+
+/* Table Wrapper */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.doctors-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Table Header */
+.doctors-table thead {
+  background: #F7F9FC;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.doctors-table thead tr {
+  display: grid;
+  grid-template-columns: 2.5fr 1.5fr 1.5fr 1fr 1fr 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 24px;
+}
+
+.doctors-table th {
+  font-size: 11px;
+  font-weight: 600;
+  color: #A0AEC0;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 0;
+  border: none;
+  margin: 0;
+}
+
+/* Table Body */
+.doctor-row {
+  display: grid;
+  grid-template-columns: 2.5fr 1.5fr 1.5fr 1fr 1fr 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #F0F4F8;
+  transition: background-color 0.2s ease;
+}
+
+.doctor-row:hover {
+  background-color: #F7F9FC;
+}
+
+.doctor-row td {
+  padding: 0;
+  margin: 0;
+  border: none;
+}
+
+.doctor-row:last-child {
+  border-bottom: none;
+}
+
+/* Doctor Name Column */
+.td-doctor-name {
+  display: contents;
+}
+
+.doctor-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  grid-column: 1;
+}
+
+.doctor-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.doctor-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.doctor-avatar-initials {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #DBEAFE;
+  color: #1B5E8F;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.doctor-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.doctor-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1A2B4A;
+  margin-bottom: 2px;
+}
+
+.doctor-id {
+  font-size: 12px;
+  color: #A0AEC0;
+}
+
+/* Specialization Column */
+.td-specialization {
+  grid-column: 2;
+}
+
+.specialization-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.specialization-badge.default {
+  background: #DBEAFE;
+  color: #1E40AF;
+}
+
+.specialization-badge.cardiology {
+  background: #FFE4E6;
+  color: #9F1239;
+}
+
+.specialization-badge.neurology {
+  background: #DCFCE7;
+  color: #166534;
+}
+
+.specialization-badge.pediatrics {
+  background: #FEF9C3;
+  color: #854D0E;
+}
+
+.specialization-badge.orthopedics {
+  background: #F3E8FF;
+  color: #6B21A8;
+}
+
+/* Qualification Column */
+.td-qualification {
+  grid-column: 3;
+  font-size: 14px;
+  color: #2D3748;
+}
+
+/* Experience Column */
+.td-experience {
+  grid-column: 4;
+  font-size: 14px;
+  color: #2D3748;
+}
+
+/* Fee Column */
+.td-fee {
+  grid-column: 5;
+  font-size: 14px;
+  color: #2D3748;
+}
+
+/* Actions Column */
+.td-actions {
+  grid-column: 6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-link {
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1B5E8F;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  transition: text-decoration 0.2s ease;
+}
+
+.action-link:hover {
+  text-decoration: underline;
+}
+
+.action-link.view-link {
+  color: #1B5E8F;
+}
+
+.action-link.edit-link {
+  color: #1B5E8F;
+}
+
+.action-separator {
+  color: #E2E8F0;
+  margin: 0 4px;
+}
+
+/* Table Footer */
+.table-footer {
+  padding: 14px 24px;
+  font-size: 13px;
+  color: #A0AEC0;
+  border-top: 1px solid #F0F4F8;
+  background: white;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  background-color: white;
+  border: 1px solid #E2E8F0;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #718096;
+  font-weight: 500;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #1B3A6B;
+  color: white;
+  border-color: #1B3A6B;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #718096;
+  font-weight: 600;
+  min-width: 140px;
+  text-align: center;
+}
+</style>
   justify-content: center;
   padding: 60px 20px;
   gap: 12px;
