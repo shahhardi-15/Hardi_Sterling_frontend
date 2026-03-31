@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import adminAPI from '@/api/admin'
+import AdminLayout from '@/components/admin/AdminLayout.vue'
 import AddDoctorModal from '@/components/admin/doctors/AddDoctorModal.vue'
 import ViewDoctorModal from '@/components/admin/doctors/ViewDoctorModal.vue'
 import EditDoctorModal from '@/components/admin/doctors/EditDoctorModal.vue'
@@ -174,18 +175,19 @@ const goToNextPage = () => {
 </script>
 
 <template>
-  <div class="manage-doctors-container">
-    <!-- Header -->
-    <header class="page-header">
-      <div class="header-content">
-        <div class="header-top">
-          <h1>Manage Doctors</h1>
+  <AdminLayout>
+    <div class="manage-doctors-container">
+      <!-- Header -->
+      <header class="page-header">
+        <div class="header-content">
+          <div class="header-top">
+            <h1>Manage Doctors</h1>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
 
-    <!-- Main Content -->
-    <main class="page-content">
+      <!-- Main Content -->
+      <main class="page-content">
       <!-- Error Alert -->
       <div v-if="error" class="alert alert-danger">
         {{ error }}
@@ -357,25 +359,27 @@ const goToNextPage = () => {
       @close="showToggleStatusModal = false"
       @success="onToggleStatusSuccess"
     />
-  </div>
+    </div>
+  </AdminLayout>
 </template>
 
 <style scoped>
 .manage-doctors-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100%;
 }
 
 .page-header {
   background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
   color: white;
-  padding: 40px 20px;
+  padding: 24px 0;
+  margin: -32px -28px 24px -28px;
+  padding: 24px 28px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .header-content {
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
 }
 
 .header-top {
@@ -391,9 +395,9 @@ const goToNextPage = () => {
 }
 
 .page-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
+  max-width: none;
+  margin: 0;
+  padding: 0;
 }
 
 .alert {

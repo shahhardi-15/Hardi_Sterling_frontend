@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import adminAPI from '@/api/admin'
+import AdminLayout from '@/components/admin/AdminLayout.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -68,237 +69,320 @@ const navigateTo = (route) => {
 </script>
 
 <template>
-  <div class="dashboard">
-    <!-- Header -->
-    <header class="dashboard-header">
-      <div class="header-content">
-        <div class="header-top">
-          <div>
-            <h1>Admin Dashboard</h1>
-            <p class="header-subtitle">Welcome, Administrator</p>
-          </div>
-          <button @click="handleLogout" class="logout-btn">
-            Logout
-          </button>
-        </div>
-      </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="dashboard-content">
+  <AdminLayout>
+    <div class="dashboard-content">
       <div v-if="loading" class="loading-container">
         <p>Loading dashboard...</p>
       </div>
 
-      <div v-else class="dashboard-grid">
+      <div v-else>
         <!-- Error Display -->
-        <div v-if="error" class="alert alert-danger full-width">
+        <div v-if="error" class="alert alert-danger">
           {{ error }}
         </div>
 
-        <!-- Statistics Cards -->
-        <section class="stats-section full-width">
-          <div class="stats-grid">
-            <!-- Total Patients Card -->
-            <div class="stat-card">
-              <div class="stat-icon patients-icon">
-                <svg fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
+        <!-- PAGE HEADER -->
+        <div class="page-header">
+          <div class="header-left">
+            <h1 class="page-title">Hospital Command Center</h1>
+            <p class="page-subtitle">Morning, Administrator. Here's the clinical status for today.</p>
+          </div>
+          <div class="view-toggle">
+            <button class="toggle-btn active">Daily View</button>
+            <button class="toggle-btn">Weekly</button>
+          </div>
+        </div>
+
+        <!-- STAT CARDS ROW -->
+        <div class="stats-grid">
+          <!-- Total Doctors -->
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2c-5.33 4.55-8 6.75-8 11 0 4.41 3.59 8 8 8s8-3.59 8-8c0-4.25-2.67-6.45-8-11z"></path>
                 </svg>
               </div>
-              <div class="stat-info">
-                <h3 class="stat-value">{{ stats.totalPatients }}</h3>
-                <p class="stat-label">Total Patients</p>
+              <div class="stat-badge">+4 this month</div>
+            </div>
+            <div class="stat-label">Total Doctors</div>
+            <div class="stat-value">{{ stats.totalDoctors }}</div>
+            <div class="stat-underline"></div>
+          </div>
+
+          <!-- Total Patients -->
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
+                </svg>
+              </div>
+              <div class="stat-badge">Active Care</div>
+            </div>
+            <div class="stat-label">Total Patients</div>
+            <div class="stat-value">{{ stats.totalPatients }}</div>
+            <div class="stat-underline"></div>
+          </div>
+
+          <!-- Total Receptionists -->
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"></path>
+                </svg>
+              </div>
+              <div class="stat-badge">All Shifts</div>
+            </div>
+            <div class="stat-label">Total Receptionists</div>
+            <div class="stat-value">{{ stats.totalReceptionists }}</div>
+            <div class="stat-underline"></div>
+          </div>
+
+          <!-- Total Appointments -->
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                  <path d="M16 2v4M8 2v4M3 10h18" fill="none" stroke="currentColor" stroke-width="2"></path>
+                </svg>
+              </div>
+              <div class="stat-badge">High Volume</div>
+            </div>
+            <div class="stat-label">Total Appointments</div>
+            <div class="stat-value">{{ stats.totalAppointments }}</div>
+            <div class="stat-underline"></div>
+          </div>
+        </div>
+
+        <!-- TWO COLUMN ROW: Appointments + Recent Completions -->
+        <div class="two-column-row">
+          <!-- LEFT COLUMN: Upcoming Appointments -->
+          <div class="left-column">
+            <div class="section-header">
+              <h2 class="section-title">Upcoming Appointments</h2>
+              <a href="#" class="view-all-link">View All →</a>
+            </div>
+
+            <div class="table-container">
+              <table class="appointments-table">
+                <thead>
+                  <tr>
+                    <th>PATIENT</th>
+                    <th>PRACTITIONER</th>
+                    <th>SCHEDULE</th>
+                    <th>ACTION</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="apt in (Array.isArray(stats.upcomingAppointments) ? stats.upcomingAppointments : [])" :key="apt.id">
+                    <td class="patient-col">
+                      <div class="patient-avatar">{{ apt.patientInitials || 'N/A' }}</div>
+                      <div class="patient-info">
+                        <div class="patient-name">{{ apt.patientName || 'N/A' }}</div>
+                        <div class="patient-id">{{ apt.patientId || 'N/A' }}</div>
+                      </div>
+                    </td>
+                    <td class="practitioner-col">
+                      <svg class="practitioner-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                        <path d="M16 2v4M8 2v4M3 10h18"></path>
+                      </svg>
+                      {{ apt.doctorName || 'N/A' }}
+                    </td>
+                    <td class="schedule-col">
+                      <div class="schedule-date">{{ apt.date || 'N/A' }}</div>
+                      <div class="schedule-time">{{ apt.time || 'N/A' }}</div>
+                    </td>
+                    <td class="action-col">
+                      <button class="action-btn" @click="navigateTo(`/admin/appointments/${apt.id}`)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN: Recent Completions + Generate Reports -->
+          <div class="right-column">
+            <!-- Recent Completions -->
+            <div class="section-header">
+              <h2 class="section-title">Recent Completions</h2>
+              <span class="today-badge">TODAY</span>
+            </div>
+
+            <div class="completions-list">
+              <div class="completion-card">
+                <div class="completion-header">
+                  <div class="completion-name">Sarah Johnson</div>
+                  <span class="completed-badge">COMPLETED</span>
+                </div>
+                <div class="completion-dept">Cardiology • Dr. Ahmed</div>
+                <div class="completion-time">
+                  <svg class="clock-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="12" r="10"></circle>
+                  </svg>
+                  11:30 AM - 12:15 PM
+                </div>
+              </div>
+
+              <div class="completion-card">
+                <div class="completion-header">
+                  <div class="completion-name">Michael Chen</div>
+                  <span class="completed-badge">COMPLETED</span>
+                </div>
+                <div class="completion-dept">Orthopedics • Dr. Smith</div>
+                <div class="completion-time">
+                  <svg class="clock-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="12" r="10"></circle>
+                  </svg>
+                  02:00 PM - 02:45 PM
+                </div>
               </div>
             </div>
 
-            <!-- Total Doctors Card -->
-            <div class="stat-card">
-              <div class="stat-icon doctors-icon">
-                <svg fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
+            <!-- Generate Reports Card -->
+            <div class="reports-card">
+              <h3 class="reports-title">Generate Reports</h3>
+              <p class="reports-description">Download comprehensive monthly analytical hospital performance reports with one click.</p>
+              <button class="download-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
+                Download PDF
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CLINICAL OCCUPANCY SECTION -->
+        <div class="occupancy-section">
+          <h2 class="section-title">Clinical Occupancy by Department</h2>
+          <div class="occupancy-grid">
+            <div class="occupancy-item">
+              <div class="occupancy-label">
+                <span>EMERGENCY WARD</span>
+                <span>84%</span>
               </div>
-              <div class="stat-info">
-                <h3 class="stat-value">{{ stats.totalDoctors }}</h3>
-                <p class="stat-label">Total Doctors</p>
+              <div class="occupancy-bar">
+                <div class="occupancy-fill" style="width: 84%; background-color: #E53E3E;"></div>
               </div>
             </div>
 
-            <!-- Total Receptionists Card -->
-            <div class="stat-card">
-              <div class="stat-icon receptionists-icon">
-                <svg fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path>
-                </svg>
+            <div class="occupancy-item">
+              <div class="occupancy-label">
+                <span>ICU / INTENSIVE CARE</span>
+                <span>42%</span>
               </div>
-              <div class="stat-info">
-                <h3 class="stat-value">{{ stats.totalReceptionists }}</h3>
-                <p class="stat-label">Receptionists</p>
+              <div class="occupancy-bar">
+                <div class="occupancy-fill" style="width: 42%; background-color: #1B5E8F;"></div>
               </div>
             </div>
 
-            <!-- Total Appointments Card -->
-            <div class="stat-card">
-              <div class="stat-icon appointments-icon">
-                <svg fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v2H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v2H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-                </svg>
+            <div class="occupancy-item">
+              <div class="occupancy-label">
+                <span>OUTPATIENT CLINIC</span>
+                <span>67%</span>
               </div>
-              <div class="stat-info">
-                <h3 class="stat-value">{{ stats.totalAppointments }}</h3>
-                <p class="stat-label">Total Appointments</p>
+              <div class="occupancy-bar">
+                <div class="occupancy-fill" style="width: 67%; background-color: #38A169;"></div>
               </div>
             </div>
           </div>
-        </section>
-
-        <!-- Appointment Statistics -->
-        <section class="dashboard-section">
-          <h2 class="section-title">Appointment Overview</h2>
-          <div class="appointment-stats">
-            <div class="stat-item">
-              <div class="stat-number upcoming">{{ stats.upcomingAppointments }}</div>
-              <div class="stat-text">Upcoming Appointments</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-number completed">{{ stats.completedAppointments }}</div>
-              <div class="stat-text">Completed Appointments</div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Management Actions -->
-        <section class="dashboard-section">
-          <h2 class="section-title">Management</h2>
-          <div class="management-grid">
-            <button @click="navigateTo('/admin/patients')" class="management-btn">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-2a6 6 0 0112 0v2zm0 0h6v-2a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-              </svg>
-              <span>Manage Patients</span>
-            </button>
-
-            <button @click="navigateTo('/admin/doctors')" class="management-btn">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
-              </svg>
-              <span>Manage Doctors</span>
-            </button>
-
-            <button @click="navigateTo('/admin/appointments')" class="management-btn">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-              </svg>
-              <span>View Appointments</span>
-            </button>
-
-            <button @click="navigateTo('/admin/settings')" class="management-btn">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-              <span>Settings</span>
-            </button>
-          </div>
-        </section>
-
-        <!-- System Health Section -->
-        <section class="dashboard-section full-width">
-          <h2 class="section-title">System Status</h2>
-          <div class="health-grid">
-            <div class="health-item">
-              <div class="health-status healthy"></div>
-              <div>
-                <p class="health-label">Database</p>
-                <p class="health-value">Connected</p>
-              </div>
-            </div>
-            <div class="health-item">
-              <div class="health-status healthy"></div>
-              <div>
-                <p class="health-label">API Server</p>
-                <p class="health-value">Running</p>
-              </div>
-            </div>
-            <div class="health-item">
-              <div class="health-status healthy"></div>
-              <div>
-                <p class="health-label">Authentication</p>
-                <p class="health-value">Active</p>
-              </div>
-            </div>
-          </div>
-        </section>
+        </div>
       </div>
-    </main>
-  </div>
+
+      <!-- FLOATING ACTION BUTTON -->
+      <button class="fab" @click="navigateTo('/admin/new-appointment')" title="Create new">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path>
+        </svg>
+      </button>
+    </div>
+  </AdminLayout>
 </template>
 
 <style scoped>
-.dashboard {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-}
-
-.dashboard-header {
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-  color: white;
-  padding: 40px 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.header-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 20px;
-}
-
-.dashboard-header h1 {
-  font-size: 32px;
-  font-weight: 700;
-  margin: 0 0 8px 0;
-}
-
-.header-subtitle {
-  font-size: 16px;
+* {
   margin: 0;
-  opacity: 0.95;
-}
-
-.logout-btn {
-  background-color: #ff5252;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
-.logout-btn:hover {
-  background-color: #ff1744;
-  box-shadow: 0 4px 12px rgba(255, 82, 82, 0.4);
-}
-
-.logout-btn:active {
-  transform: scale(0.98);
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .dashboard-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
+  min-height: 100%;
+  width: 100%;
 }
+
+/* PAGE HEADER */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.header-left {
+  flex: 1;
+  text-align: left;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1A2B4A;
+  margin: 0 0 6px 0;
+  text-align: left;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: #718096;
+  margin: 0;
+  text-align: left;
+}
+
+.view-toggle {
+  background: #F0F4F8;
+  border-radius: 8px;
+  padding: 4px;
+  display: flex;
+  gap: 2px;
+}
+
+.toggle-btn {
+  background: transparent;
+  color: #718096;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggle-btn.active {
+  background: #1B3A6B;
+  color: white;
+  font-weight: 600;
+}
+
+.toggle-btn:hover:not(.active) {
+  color: #1A2B4A;
+}
+
+/* ============================================
+   MAIN CONTENT AREA
+   ============================================ */
 
 .loading-container {
   text-align: center;
@@ -307,43 +391,6 @@ const navigateTo = (route) => {
   font-size: 16px;
 }
 
-.dashboard-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.full-width {
-  width: 100%;
-}
-
-.dashboard-section {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.section-title {
-  font-size: 20px;
-  font-weight: 600;
-  margin: 0 0 20px 0;
-  color: #333;
-}
-
-/* Alert Styles */
 .alert {
   padding: 16px;
   border-radius: 8px;
@@ -357,258 +404,504 @@ const navigateTo = (route) => {
   border: 1px solid #ef5350;
 }
 
-/* Stats Section */
-.stats-section {
-  padding: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
+/* STATS GRID */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
+  margin-bottom: 32px;
 }
 
 .stat-card {
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
   padding: 20px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  position: relative;
 }
 
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.stat-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
 }
 
 .stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  background: #EBF4FF;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
 .stat-icon svg {
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
+  color: #1B5E8F;
 }
 
-.patients-icon {
-  background-color: #e3f2fd;
-  color: #1976d2;
+.stat-badge {
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #EBF4FF;
+  color: #1B5E8F;
 }
 
-.doctors-icon {
-  background-color: #f3e5f5;
-  color: #7b1fa2;
-}
-
-.receptionists-icon {
-  background-color: #e8f5e9;
-  color: #388e3c;
-}
-
-.appointments-icon {
-  background-color: #fff3e0;
-  color: #f57c00;
-}
-
-.stat-info {
-  flex: 1;
-}
-
-.stat-value {
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0;
-  color: #333;
+.stat-card:nth-child(4) .stat-badge {
+  background: #FFF5F5;
+  color: #E53E3E;
 }
 
 .stat-label {
-  font-size: 14px;
-  color: #999;
-  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: #718096;
+  font-weight: 400;
+  margin-bottom: 6px;
 }
 
-/* Appointment Stats */
-.appointment-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-}
-
-.stat-item {
-  text-align: center;
-  padding: 20px;
-  background: #f9f9f9;
-  border-radius: 6px;
-}
-
-.stat-number {
+.stat-value {
   font-size: 32px;
   font-weight: 700;
-  margin-bottom: 8px;
+  color: #1A2B4A;
+  margin-bottom: 12px;
 }
 
-.stat-number.upcoming {
-  color: #f57c00;
+.stat-underline {
+  height: 3px;
+  width: 48px;
+  background: #1B5E8F;
+  border-radius: 2px;
 }
 
-.stat-number.completed {
-  color: #388e3c;
-}
-
-.stat-text {
-  font-size: 14px;
-  color: #666;
-  font-weight: 500;
-}
-
-/* Management Grid */
-.management-grid {
+/* TWO COLUMN ROW */
+.two-column-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 16px;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  margin-bottom: 32px;
 }
 
-.management-btn {
+.left-column {
+  flex: 1;
+}
+
+.right-column {
+  width: 380px;
+}
+
+.section-header {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 20px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1A2B4A;
+  margin: 0;
+}
+
+.view-all-link {
+  font-size: 13px;
+  color: #1B5E8F;
+  text-decoration: none;
+  transition: text-decoration 0.2s ease;
+}
+
+.view-all-link:hover {
+  text-decoration: underline;
+}
+
+.today-badge {
+  background: #F0F4F8;
+  color: #718096;
+  font-size: 11px;
   font-weight: 600;
-  color: #333;
-}
-
-.management-btn svg {
-  width: 32px;
-  height: 32px;
-  color: #2196F3;
-}
-
-.management-btn:hover {
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-  border-color: #1976d2;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
-}
-
-.management-btn:hover svg {
-  color: white;
-}
-
-.management-btn:active {
-  transform: translateY(0);
-}
-
-/* Health Grid */
-.health-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-}
-
-.health-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: #f9f9f9;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
   border-radius: 6px;
 }
 
-.health-status {
-  width: 12px;
-  height: 12px;
+/* TABLE */
+.table-container {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
+  overflow: hidden;
+}
+
+.appointments-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.appointments-table thead {
+  background: #F7F9FC;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.appointments-table th {
+  padding: 12px 20px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: #A0AEC0;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.appointments-table tbody tr {
+  border-bottom: 1px solid #F0F4F8;
+  transition: background-color 0.2s ease;
+}
+
+.appointments-table tbody tr:hover {
+  background: #F7F9FC;
+}
+
+.appointments-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.appointments-table td {
+  padding: 16px 20px;
+  font-size: 14px;
+  color: #2D3748;
+}
+
+.patient-col {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.patient-avatar {
+  width: 36px;
+  height: 36px;
+  background: #1B3A6B;
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
   flex-shrink: 0;
 }
 
-.health-status.healthy {
-  background-color: #4caf50;
-  box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
+.patient-info {
+  flex: 1;
 }
 
-.health-label {
+.patient-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1A2B4A;
+}
+
+.patient-id {
   font-size: 12px;
-  color: #999;
-  margin: 0;
+  color: #A0AEC0;
+}
+
+.practitioner-col {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.practitioner-icon {
+  width: 14px;
+  height: 14px;
+  color: #718096;
+  flex-shrink: 0;
+}
+
+.schedule-col {
+}
+
+.schedule-date {
+  font-size: 13px;
+  color: #2D3748;
   font-weight: 500;
 }
 
-.health-value {
+.schedule-time {
+  font-size: 12px;
+  color: #A0AEC0;
+}
+
+.action-col {
+}
+
+.action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.action-btn svg {
+  width: 16px;
+  height: 16px;
+  color: #A0AEC0;
+  transition: color 0.2s ease;
+}
+
+.action-btn:hover svg {
+  color: #1B5E8F;
+}
+
+/* COMPLETIONS LIST */
+.completions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.completion-card {
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #E2E8F0;
+  padding: 14px 16px;
+}
+
+.completion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.completion-name {
   font-size: 14px;
-  color: #333;
-  margin: 4px 0 0 0;
   font-weight: 600;
+  color: #1A2B4A;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .dashboard-header {
-    padding: 30px 16px;
-  }
+.completed-badge {
+  background: #EBF4FF;
+  color: #1B5E8F;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
 
-  .dashboard-header h1 {
-    font-size: 24px;
-  }
+.completion-dept {
+  font-size: 12px;
+  color: #718096;
+  margin-top: 4px;
+  text-align: left;
+}
 
-  .header-top {
-    flex-direction: column;
-    align-items: stretch;
-  }
+.completion-time {
+  font-size: 12px;
+  color: #A0AEC0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
 
-  .logout-btn {
-    width: 100%;
-    text-align: center;
-  }
+.clock-icon {
+  width: 12px;
+  height: 12px;
+  color: #A0AEC0;
+}
 
-  .dashboard-content {
-    padding: 20px;
-  }
+/* REPORTS CARD */
+.reports-card {
+  background: #1B3A6B;
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 16px;
+}
 
+.reports-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 10px 0;
+}
+
+.reports-description {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+  margin: 0 0 20px 0;
+}
+
+.download-btn {
+  background: white;
+  color: #1B3A6B;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.download-btn:hover {
+  background: #F0F4F8;
+}
+
+.download-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* OCCUPANCY SECTION */
+.occupancy-section {
+  margin-top: 32px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.occupancy-section .section-title {
+  margin-bottom: 24px;
+}
+
+.occupancy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.occupancy-item {
+}
+
+.occupancy-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #718096;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.occupancy-bar {
+  height: 6px;
+  background: #E2E8F0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.occupancy-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+/* FLOATING ACTION BUTTON */
+.fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  background: #1B3A6B;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(27, 58, 107, 0.4);
+  transition: all 0.2s ease;
+  z-index: 500;
+}
+
+.fab:hover {
+  background: #152D54;
+  transform: scale(1.05);
+}
+
+.fab svg {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 1024px) {
   .stats-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .management-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 480px) {
-  .stats-grid,
-  .management-grid,
-  .health-grid,
-  .appointment-stats {
+  .two-column-row {
     grid-template-columns: 1fr;
   }
 
-  .stat-card {
-    flex-direction: column;
-    text-align: center;
+  .right-column {
+    width: 100%;
   }
 
-  .stat-icon {
-    width: 56px;
-    height: 56px;
+  .occupancy-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 1001;
+  }
+
+  .navbar {
+    left: 0;
+  }
+
+  .main-content {
+    margin-left: 0;
+    margin-top: 64px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search-bar {
+    width: 200px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .view-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .occupancy-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

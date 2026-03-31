@@ -150,209 +150,232 @@ const handlePhoneInput = (event) => {
 </script>
 
 <template>
-  <div class="modal-overlay" @click="handleCancel">
-    <div class="modal-content" @click.stop>
-      <div class="modal-header">
-        <h2>Register New Patient</h2>
-        <button @click="handleCancel" class="close-btn">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
+  <div class="slide-panel-overlay" @click="handleCancel"></div>
+  
+  <div class="slide-panel" :class="{ 'slide-panel-open': true }">
+    <!-- Panel Header -->
+    <div class="panel-header">
+      <div class="header-content">
+        <h2 class="panel-title">Register New Patient</h2>
+        <p class="panel-subtitle">Initialize a new medical file for entry.</p>
+      </div>
+      <button @click="handleCancel" class="close-btn">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Panel Body -->
+    <div class="panel-body">
+      <!-- Success Toast -->
+      <div v-if="showSuccessToast" class="toast success-toast">
+        {{ toastMessage }}
       </div>
 
-      <div class="modal-body">
-        <!-- Success Toast -->
-        <div v-if="showSuccessToast" class="toast success-toast">
-          {{ toastMessage }}
-        </div>
+      <!-- Full Name (Full Width) -->
+      <div class="form-group full-width">
+        <label class="form-label">FULL LEGAL NAME</label>
+        <input
+          v-model="formData.full_name"
+          type="text"
+          class="form-input"
+          :class="{ 'input-error': errors.full_name }"
+          placeholder="e.g. John Doe"
+        />
+        <p v-if="errors.full_name" class="error-message">{{ errors.full_name }}</p>
+      </div>
 
-        <!-- Full Name -->
+      <!-- Gender + Date of Birth (Side by Side) -->
+      <div class="form-row">
         <div class="form-group">
-          <label>Full Name<span class="required">*</span></label>
-          <input
-            v-model="formData.full_name"
-            type="text"
-            class="form-input"
-            :class="errors.full_name && 'input-error'"
-            placeholder="Enter full name"
-          />
-          <p v-if="errors.full_name" class="error-message">{{ errors.full_name }}</p>
-        </div>
-
-        <!-- Email -->
-        <div class="form-group">
-          <label>Email<span class="required">*</span></label>
-          <input
-            v-model="formData.email"
-            type="email"
-            class="form-input"
-            :class="errors.email && 'input-error'"
-            placeholder="Enter email address"
-          />
-          <p v-if="errors.email" class="error-message">{{ errors.email }}</p>
-        </div>
-
-        <!-- Password -->
-        <div class="form-group">
-          <label>Password<span class="required">*</span></label>
-          <input
-            v-model="formData.password"
-            type="password"
-            class="form-input"
-            :class="errors.password && 'input-error'"
-            placeholder="Min 8 characters"
-          />
-          <p v-if="errors.password" class="error-message">{{ errors.password }}</p>
-        </div>
-
-        <!-- Gender -->
-        <div class="form-group">
-          <label>Gender<span class="required">*</span></label>
-          <select
-            v-model="formData.gender"
-            class="form-input"
-            :class="errors.gender && 'input-error'"
-          >
-            <option value="">Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
+          <label class="form-label">GENDER</label>
+          <div class="select-wrapper">
+            <select
+              v-model="formData.gender"
+              class="form-input"
+              :class="{ 'input-error': errors.gender }"
+            >
+              <option value="">Select</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+            <svg class="select-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+          </div>
           <p v-if="errors.gender" class="error-message">{{ errors.gender }}</p>
         </div>
 
-        <!-- Date of Birth -->
         <div class="form-group">
-          <label>Date of Birth<span class="required">*</span></label>
+          <label class="form-label">DATE OF BIRTH</label>
           <input
             v-model="formData.date_of_birth"
             type="date"
             class="form-input"
-            :class="errors.date_of_birth && 'input-error'"
+            :class="{ 'input-error': errors.date_of_birth }"
+            placeholder="mm/dd/yyyy"
           />
           <p v-if="errors.date_of_birth" class="error-message">{{ errors.date_of_birth }}</p>
         </div>
+      </div>
 
-        <!-- Phone Number -->
+      <!-- Email (Full Width) -->
+      <div class="form-group full-width">
+        <label class="form-label">EMAIL ADDRESS</label>
+        <input
+          v-model="formData.email"
+          type="email"
+          class="form-input"
+          :class="{ 'input-error': errors.email }"
+          placeholder="john@example.com"
+        />
+        <p v-if="errors.email" class="error-message">{{ errors.email }}</p>
+      </div>
+
+      <!-- Phone Number + Access Password (Side by Side) -->
+      <div class="form-row">
         <div class="form-group">
-          <label>Phone Number<span class="required">*</span></label>
+          <label class="form-label">PHONE NUMBER</label>
           <input
             :value="formData.phone"
             type="tel"
             class="form-input"
-            :class="errors.phone && 'input-error'"
-            placeholder="10 digit phone number"
+            :class="{ 'input-error': errors.phone }"
+            placeholder="+1 (555) 000-0000"
             maxlength="10"
             @input="handlePhoneInput"
           />
           <p v-if="errors.phone" class="error-message">{{ errors.phone }}</p>
         </div>
 
-        <!-- Address -->
         <div class="form-group">
-          <label>Address</label>
-          <textarea
-            v-model="formData.address"
-            class="form-textarea"
-            placeholder="Enter address (optional)"
-            rows="3"
-          ></textarea>
+          <label class="form-label">ACCESS PASSWORD</label>
+          <input
+            v-model="formData.password"
+            type="password"
+            class="form-input"
+            :class="{ 'input-error': errors.password }"
+            placeholder="••••••••"
+          />
+          <p v-if="errors.password" class="error-message">{{ errors.password }}</p>
         </div>
       </div>
 
-      <div class="modal-footer">
-        <button @click="handleCancel" class="btn-secondary" :disabled="loading">
-          Cancel
-        </button>
-        <button @click="handleSubmit" class="btn-primary" :disabled="loading">
-          <span v-if="!loading">Register Patient</span>
-          <span v-else>Registering...</span>
-        </button>
+      <!-- Residential Address (Full Width) -->
+      <div class="form-group full-width">
+        <label class="form-label">RESIDENTIAL ADDRESS</label>
+        <input
+          v-model="formData.address"
+          type="text"
+          class="form-input"
+          :class="{ 'input-error': errors.address }"
+          placeholder="123 Medical Dr, Clinical Heights"
+        />
       </div>
+
+      <!-- Confirm Enrollment Button -->
+      <button @click="handleSubmit" class="btn-confirm-enrollment" :disabled="loading">
+        <span v-if="!loading">Confirm Enrollment →</span>
+        <span v-else>Enrolling...</span>
+      </button>
+
+      <!-- Disclaimer Text -->
+      <p class="disclaimer-text">
+        By registering, you confirm clinical consent and data privacy standards.
+      </p>
     </div>
   </div>
 </template>
 
 <style scoped>
-.modal-overlay {
+/* Slide Panel Overlay */
+.slide-panel-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  animation: fadeIn 0.3s ease-out;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 49;
+  opacity: 1;
+  transition: opacity 0.3s ease;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.modal-content {
+/* Slide Panel */
+.slide-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 480px;
+  height: 100vh;
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
+  border-left: 1px solid #E2E8F0;
+  border-radius: 12px 0 0 12px;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
+  z-index: 50;
   display: flex;
   flex-direction: column;
-  animation: slideUp 0.3s ease-out;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  will-change: transform;
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+.slide-panel.slide-panel-open {
+  transform: translateX(0);
 }
 
-.modal-header {
-  padding: 24px;
-  border-bottom: 1px solid #e0e0e0;
+/* Panel Header */
+.panel-header {
+  padding: 32px 28px;
+  border-bottom: 1px solid #E2E8F0;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  flex-shrink: 0;
 }
 
-.modal-header h2 {
+.header-content {
+  flex: 1;
+  margin-right: 16px;
+  margin-bottom: 12px;
+}
+
+.panel-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1A2B4A;
+  margin: 0 0 6px 0;
+  padding: 0;
+}
+
+.panel-subtitle {
+  font-size: 13px;
+  color: #718096;
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-  color: #333;
+  padding: 0;
 }
 
 .close-btn {
   background: none;
   border: none;
   cursor: pointer;
-  color: #999;
+  color: #A0AEC0;
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
-  transition: all 0.3s ease;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  padding: 0;
 }
 
 .close-btn:hover {
-  background-color: #f0f0f0;
-  color: #333;
+  background-color: #F7F9FC;
+  color: #4A5568;
 }
 
 .close-btn svg {
@@ -360,124 +383,31 @@ const handlePhoneInput = (event) => {
   height: 20px;
 }
 
-.modal-body {
-  padding: 24px;
+/* Panel Body */
+.panel-body {
+  padding: 40px 28px 32px 28px;
   overflow-y: auto;
   flex: 1;
+  margin-top: 20px;
 }
 
+/* Toast */
 .toast {
   padding: 12px 16px;
-  border-radius: 6px;
+  border-radius: 8px;
   margin-bottom: 20px;
   font-size: 14px;
   font-weight: 500;
-  animation: slideIn 0.3s ease-out;
+  animation: toastSlideIn 0.3s ease-out;
 }
 
 .success-toast {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  border: 1px solid #4caf50;
+  background-color: #DCFCE7;
+  color: #166534;
+  border: 1px solid #86EFAC;
 }
 
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: #333;
-  font-size: 14px;
-}
-
-.required {
-  color: #f44336;
-}
-
-.form-input,
-.form-textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  font-family: inherit;
-  outline: none;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
-}
-
-.form-input:focus,
-.form-textarea:focus {
-  border-color: #2196F3;
-  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
-}
-
-.form-input.input-error,
-.form-textarea.input-error {
-  border-color: #f44336;
-}
-
-.form-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-.error-message {
-  color: #f44336;
-  font-size: 12px;
-  margin: 6px 0 0 0;
-}
-
-.modal-footer {
-  padding: 24px;
-  border-top: 1px solid #e0e0e0;
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-}
-
-.btn-secondary,
-.btn-primary {
-  padding: 10px 24px;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 14px;
-}
-
-.btn-secondary {
-  background-color: #f0f0f0;
-  color: #333;
-  border: 1px solid #ddd;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background-color: #e0e0e0;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
-  transform: translateY(-2px);
-}
-
-.btn-primary:disabled,
-.btn-secondary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-@animationslideIn {
+@keyframes toastSlideIn {
   from {
     opacity: 0;
     transform: translateY(-10px);
@@ -488,29 +418,170 @@ const handlePhoneInput = (event) => {
   }
 }
 
-@media (max-width: 600px) {
-  .modal-content {
-    width: 95%;
-    max-height: 95vh;
-  }
+/* Form Groups */
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
 
-  .modal-header,
-  .modal-body,
-  .modal-footer {
-    padding: 16px;
-  }
+.form-group.full-width {
+  margin-bottom: 28px;
+}
 
-  .modal-header h2 {
-    font-size: 18px;
-  }
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
 
-  .modal-footer {
-    flex-direction: column-reverse;
-  }
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #4A5568;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding: 0;
+  text-align: left;
+}
 
-  .btn-secondary,
-  .btn-primary {
+/* Form Inputs */
+.form-input {
+  width: 100%;
+  height: 44px;
+  background: #F7F9FC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 0 14px;
+  font-size: 14px;
+  color: #2D3748;
+  box-sizing: border-box;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s ease;
+  appearance: none;
+  text-align: left;
+}
+
+.form-input::placeholder {
+  color: #A0AEC0;
+}
+
+.form-input:focus {
+  border-color: #1B5E8F;
+  box-shadow: 0 0 0 3px rgba(27, 94, 143, 0.12);
+  background: white;
+}
+
+.form-input.input-error {
+  border-color: #F56565;
+}
+
+.form-input.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.12);
+}
+
+/* Select Wrapper for Chevron */
+.select-wrapper {
+  position: relative;
+}
+
+.select-chevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%) rotate(180deg);
+  width: 18px;
+  height: 18px;
+  color: #A0AEC0;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+select.form-input {
+  padding-right: 40px;
+}
+
+/* Error Messages */
+.error-message {
+  color: #F56565;
+  font-size: 12px;
+  margin: 6px 0 0 0;
+  padding: 0;
+  text-align: left;
+}
+
+/* Confirm Enrollment Button */
+.btn-confirm-enrollment {
+  width: 100%;
+  height: 52px;
+  background: #1B3A6B;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+  padding: 0;
+}
+
+.btn-confirm-enrollment:hover:not(:disabled) {
+  background: #152D54;
+  transform: translateY(-1px);
+}
+
+.btn-confirm-enrollment:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Disclaimer Text */
+.disclaimer-text {
+  font-size: 12px;
+  color: #A0AEC0;
+  text-align: center;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .slide-panel {
     width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .slide-panel {
+    width: 100%;
+    border-radius: 0;
+  }
+
+  .panel-header {
+    padding: 24px 20px;
+  }
+
+  .panel-body {
+    padding: 0 20px 24px 20px;
+  }
+
+  .form-label {
+    font-size: 10px;
+  }
+
+  .form-input {
+    height: 40px;
+    font-size: 13px;
+    padding: 0 12px;
+  }
+
+  .btn-confirm-enrollment {
+    height: 48px;
+    font-size: 14px;
   }
 }
 </style>

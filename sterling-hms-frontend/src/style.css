@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;
@@ -61,15 +69,17 @@
 }
 
 #app {
-  width: 1126px;
+  width: 100%;
   max-width: 100%;
-  margin: 0 auto;
+  margin: 0;
+  padding: 0;
   text-align: center;
-  border-inline: 1px solid var(--border);
+  border-inline: none;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 #center {
